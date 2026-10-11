@@ -225,8 +225,7 @@
             projectId: "project-6743089200855905181",
             storageBucket: "project-6743089200855905181.firebasestorage.app",
             messagingSenderId: "187386380249",
-            appId: "1:187386380249:web:9185a2d7c615d890efa3c8",
-            measurementId: "G-XQLCMR72R6"
+            appId: "1:187386380249:web:9185a2d7c615d890efa3c8"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -234,7 +233,8 @@
         window.isChatOpen = false;
         window.currentMood = 'love';
         let currentMessages = [];
-        let autoStreakValue = 0;
+        let streakAnchor = 0;
+        let streakOffset = 0;
 
         window.sendToDatabase = function(messageText, type) {
             push(ref(db, 'messages'), { sender: 'Lara', text: messageText, status: 'Delivered', timestamp: serverTimestamp(), msgType: type });
@@ -245,11 +245,13 @@
         
         onValue(ref(db, 'messages'), (snapshot) => {
             currentMessages = [];
+            let incomingKeys = new Set();
             
             if(snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
                     const msg = childSnapshot.val();
                     const msgKey = childSnapshot.key;
+                    incomingKeys.add(msgKey);
                     currentMessages.push({ key: msgKey, ...msg });
                     
                     const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -274,55 +276,52 @@
                         setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 10);
                     }
                 });
-            } else {
-                // THE FIX: Instantly wipe the chat HTML if admin deletes everything
-                chatHistory.innerHTML = '';
-                autoStreakValue = 0;
             }
-            if (window.isChatOpen) window.markUnreadAsSeen();
+            
+            // THE FIX: Instantly wipe elements that were deleted by Admin
+            Array.from(chatHistory.children).forEach(child => {
+                if (!incomingKeys.has(child.id.replace('msg-', ''))) child.remove();
+            });
 
-            // Automatic Math Streak
-            const validMsgs = currentMessages.filter(m => m.timestamp);
-            if (validMsgs.length === 0) {
-                autoStreakValue = 0;
+            if (window.isChatOpen) window.markUnreadAsSeen();
+            recalcStreak();
+        });
+
+        onValue(ref(db, 'settings/streakState'), (snapshot) => {
+            if(snapshot.exists()) {
+                streakAnchor = snapshot.val().anchor || 0;
+                streakOffset = snapshot.val().offset || 0;
             } else {
+                streakAnchor = 0; 
+                streakOffset = 0;
+            }
+            recalcStreak();
+        });
+
+        // Dynamic Anchor Streak Engine
+        function recalcStreak() {
+            const validMsgs = currentMessages.filter(m => m.timestamp && m.timestamp >= streakAnchor);
+            let mathStreak = 0;
+            
+            if (validMsgs.length > 0) {
                 const getStr = (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
                 const uniqueDates = [...new Set(validMsgs.map(m => getStr(new Date(m.timestamp))))].sort().reverse();
                 
                 const today = new Date();
                 const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
                 
-                let streak = 0;
                 if (uniqueDates[0] === getStr(today) || uniqueDates[0] === getStr(yesterday)) {
-                    streak = 1;
+                    mathStreak = 1;
                     let currDate = new Date(uniqueDates[0] + 'T12:00:00'); 
                     for (let i = 1; i < uniqueDates.length; i++) {
                         currDate.setDate(currDate.getDate() - 1);
-                        if (uniqueDates[i] === getStr(currDate)) streak++;
+                        if (uniqueDates[i] === getStr(currDate)) mathStreak++;
                         else break;
                     }
                 }
-                autoStreakValue = streak;
             }
-            updateStreakUI();
-        });
-
-        let isManualStreak = false;
-        let manualStreakValue = 0;
-
-        onValue(ref(db, 'settings/streak'), (snapshot) => {
-            if (snapshot.exists()) {
-                isManualStreak = snapshot.val().manual;
-                manualStreakValue = snapshot.val().value;
-            } else {
-                isManualStreak = false;
-            }
-            updateStreakUI();
-        });
-
-        function updateStreakUI() {
-            if (isManualStreak) document.getElementById('streak-count').innerText = manualStreakValue.toString();
-            else document.getElementById('streak-count').innerText = autoStreakValue.toString();
+            const finalStreak = mathStreak + streakOffset;
+            document.getElementById('streak-count').innerText = finalStreak.toString();
         }
 
         onValue(ref(db, 'settings/remoteLock'), (snapshot) => {
@@ -540,7 +539,7 @@
             setTimeout(() => p.remove(), 12000); 
         }, 800); 
 
-        // THE FIX: Smart UI reset instead of screen blanking
+        // THE FIX: Reset UI safely without causing white screens
         window.triggerDestruct = function() {
             document.getElementById('dashboard-screen').style.display = 'none';
             document.getElementById('dashboard-screen').classList.add('slide-hidden');
@@ -569,9 +568,11 @@
         });
         window.addEventListener("pagehide", window.triggerDestruct);
         
-        // THE FIX: Catches Safari loading the page from the "Back" button cache
+        // THE BFCache FIX: Safari "Back Button" Hard Reload
         window.addEventListener("pageshow", function(e) {
-            if (e.persisted) window.triggerDestruct();
+            if (e.persisted) {
+                window.location.reload();
+            }
         });
     </script>
 </body>
