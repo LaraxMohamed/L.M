@@ -10,16 +10,14 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* FIXED: Locked the body to the viewport to kill the iOS keyboard push bug */
         body { 
             background-color: #050508; color: #ffffff; 
-            width: 100vw; height: 100dvh; /* dynamic viewport height */
+            width: 100vw; height: 100dvh;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             overflow: hidden; overscroll-behavior: none;
             display: flex; justify-content: center; align-items: center; 
         }
 
-        /* Mood Aura Background */
         .ambient-bg {
             position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
             background: radial-gradient(circle at 10% 20%, rgba(90, 30, 100, 0.4), transparent 45%),
@@ -37,18 +35,15 @@
         .hidden { opacity: 0; pointer-events: none; transform: scale(0.95); visibility: hidden; }
         .slide-hidden { opacity: 0; pointer-events: none; transform: translateY(30px); visibility: hidden; }
 
-        /* Music Toggle Button */
         .music-btn { position: absolute; top: 25px; right: 25px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; backdrop-filter: blur(10px); transition: all 0.3s ease; }
         .music-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.15); }
 
-        /* Auth & Scanner */
         .auth-text { color: #dcdcdc; font-size: 0.85rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 50px; font-weight: 300; }
         .fingerprint-btn { font-size: 5.5rem; color: rgba(255,255,255,0.15); background: none; border: none; outline: none; cursor: pointer; transition: all 0.4s ease; position: relative; }
         .fingerprint-btn.scanning { color: #ffffff; text-shadow: 0 0 30px rgba(255, 255, 255, 0.8); transform: scale(1.05); }
         .pulse-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0); pointer-events: none; }
         @keyframes scan-pulse { 0% { width: 100px; height: 100px; border-color: rgba(255,255,255, 0.6); } 100% { width: 280px; height: 280px; border-color: rgba(255,255,255, 0); } }
 
-        /* Password Gate */
         .pass-container { text-align: center; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.15); padding: 40px 30px; border-radius: 28px; width: 100%; max-width: 320px; backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .pass-container h2 { font-weight: 400; letter-spacing: 1px; margin-bottom: 25px; font-size: 1.15rem; color: #eee; }
         .pass-input { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 16px 20px; border-radius: 14px; font-size: 1.1rem; text-align: center; letter-spacing: 2px; width: 100%; margin-bottom: 20px; outline: none; transition: border 0.3s; }
@@ -57,7 +52,6 @@
         .pass-btn:active { transform: scale(0.95); }
         .error-msg { color: #ff4757; font-size: 0.85rem; margin-top: 15px; opacity: 0; transition: opacity 0.3s; }
 
-        /* Dashboard */
         #dashboard-screen { justify-content: flex-start; }
         .header-profile { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px; margin-top: 10px; }
         .avatar-container { width: 80px; height: 80px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); margin-bottom: 15px; animation: float 4s ease-in-out infinite; }
@@ -84,7 +78,6 @@
         .tile-vault .tile-icon { color: #f6e58d; }
         .tile-signal .tile-icon { color: #ff9ff3; }
 
-        /* Terminal Chat */
         #communication-screen { justify-content: space-between; padding: 20px 15px; }
         .nav-header { width: 100%; display: flex; align-items: center; padding-top: 15px; margin-bottom: 15px; }
         .back-btn { font-size: 1.2rem; color: #aaa; cursor: pointer; padding: 10px 10px 10px 0; transition: color 0.3s; }
@@ -116,7 +109,6 @@
 </head>
 <body>
 
-    <!-- Background Audio Setup -->
     <audio id="bg-music" loop>
         <source src="wayah.m4a" type="audio/mp4">
     </audio>
@@ -125,7 +117,6 @@
 
     <div class="mobile-container">
         
-        <!-- Music Control Button -->
         <button id="music-toggle" class="music-btn" onclick="toggleMusic()">
             <i class="fa-solid fa-volume-xmark"></i>
         </button>
@@ -301,14 +292,12 @@
         function startScan(e) { 
             if(isScanned) return; if(e) e.preventDefault(); 
             fpBtn.classList.add('scanning'); sText.innerText = "Verifying..."; sText.style.color = "#fff"; ring.style.animation = "scan-pulse 1s ease-out infinite"; 
-            if (navigator.vibrate) navigator.vibrate([200, 300, 200, 300, 200]); 
             scanTimer = setTimeout(triggerPassword, 2500); 
         }
         
         function stopScan(e) { 
             if(isScanned) return; if(e) e.preventDefault(); 
             clearTimeout(scanTimer); fpBtn.classList.remove('scanning'); sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; ring.style.animation = "none"; 
-            if (navigator.vibrate) navigator.vibrate(0); 
         }
         
         function triggerPassword() { 
@@ -335,7 +324,7 @@
         
         fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchend', stopScan); fpBtn.addEventListener('touchcancel', stopScan);
 
-        // --- PASSWORD GATE ---
+        // --- PASSWORD GATE & SCROLL FIX ---
         document.getElementById('pass-input').addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
         function checkPassword() {
             const val = document.getElementById('pass-input').value.trim();
@@ -343,6 +332,13 @@
                 
                 document.getElementById('pass-input').blur();
                 
+                // Wait exactly 150ms for the iOS keyboard to physically slide down before resetting the view
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                }, 150);
+
                 document.getElementById('password-screen').classList.add('hidden');
                 startCounter();
                 
@@ -391,17 +387,37 @@
             }
         }
 
-        // --- SILENT INTERNAL SELF-DESTRUCT ---
+        // --- ZERO-WARNING HTML SELF-DESTRUCT ---
         function triggerDestruct() {
-            // Instantly blank out the screen and reload to lock it without triggering an Apple warning
-            document.body.style.display = 'none';
-            window.location.reload();
+            // Instantly hide all active screens
+            document.getElementById('dashboard-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').classList.add('slide-hidden');
+            document.getElementById('password-screen').style.display = 'none';
+            document.getElementById('password-screen').classList.add('hidden');
+            document.getElementById('communication-screen').style.display = 'none';
+            document.getElementById('communication-screen').classList.add('slide-hidden');
+            
+            // Bring the scanner screen back to the front
+            const scanner = document.getElementById('scanner-screen');
+            scanner.style.display = 'flex';
+            scanner.classList.remove('hidden');
+            
+            // Reset variables so she is forced to scan and type the password again
+            document.getElementById('pass-input').value = '';
+            isScanned = false;
+            document.getElementById('status-text').innerText = "Awaiting Identity";
+            document.getElementById('status-text').style.color = "#dcdcdc";
+            document.getElementById('fingerprint').classList.remove('scanning');
+            document.getElementById('ring1').style.animation = "none";
+            
+            // Mute music if it was playing
+            if (isMusicPlaying) toggleMusic();
         }
         
+        // Triggers the instant reset the exact millisecond Safari minimizes
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === 'hidden') triggerDestruct();
         });
-        
         window.addEventListener("pagehide", triggerDestruct);
     </script>
 </body>
