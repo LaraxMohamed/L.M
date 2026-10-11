@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Lara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #2b0810; 
+            color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            flex-direction: column;
+        }
+
+        /* --- STAGE 1: REALISTIC ENVELOPE SCENE --- */
+        #envelope-scene {
+            display: flex;
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 1s ease;
+        }
+        .top-text {
+            position: absolute;
+            top: 15%;
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: opacity 0.3s;
+        }
+        .open-text {
+            position: absolute;
+            top: 28%;
+            font-family: 'Playfair Display', serif;
+            font-size: 38px;
+            font-weight: 400;
+            color: #d4af37;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+            animation: breathe 3s infinite ease-in-out;
+            transition: opacity 0.3s;
+        }
+        @keyframes breathe {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); text-shadow: 0 2px 15px rgba(212,175,55,0.4); }
+        }
+
+        .envelope-wrapper {
+            position: absolute;
+            top: 45%;
+            width: 340px;
+            height: 220px;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+        .envelope-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #360911; 
+            border-radius: 4px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        
+        .letter-insert {
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+            width: 320px;
+            height: 200px;
+            background: #f0ebd8;
+            border-radius: 8px;
+            z-index: 2;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s;
+        }
+
+        .envelope-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #661625 0%, #4a0f19 100%);
+            border-radius: 4px;
+            clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+            z-index: 3;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+        }
+        .flap-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 130px;
+            transform-origin: top;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.4s;
+            z-index: 5;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+        }
+        .flap {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #751a2b 0%, #5c1422 100%);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            position: relative;
+        }
+        .seal {
+            position: absolute;
+            bottom: -20px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55px;
+            height: 55px;
+            background: radial-gradient(circle at 30% 30%, #f4d068 0%, #c4962b 40%, #8a6210 80%, #4a3000 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 0 5px rgba(255,255,255,0.4), inset 0 -3px 8px rgba(0,0,0,0.6), 0 4px 10px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 6;
+            transition: opacity 0.3s 0.1s;
+        }
+        .seal::after {
+            content: '♥';
+            font-size: 26px;
+            color: #5c3c00;
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.3), -1px -1px 2px rgba(0,0,0,0.8);
+            transform: scaleY(0.9);
+        }
+
+        .envelope-wrapper.open .flap-container { transform: rotateX(180deg); z-index: 1; }
+        .envelope-wrapper.open .seal { opacity: 0; }
+        .envelope-wrapper.open .letter-insert { transform: translateY(-130px); }
+
+        /* --- STAGE 2: THE SCRAPBOOK REVEAL --- */
+        #scrapbook-scene {
+            display: none;
+            opacity: 0;
+            width: 100%;
+            min-height: 100vh;
+            padding: 60px 20px;
+            transition: opacity 1.5s ease;
+        }
+        .scrapbook-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 60px;
+            max-width: 1100px;
+            margin: 0 auto;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Film Strip Gallery */
+        .film-strip {
+            background-color: #0a0a0a;
+            width: 100%;
+            max-width: 340px;
+            padding: 20px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            background-image: 
+                repeating-linear-gradient(to bottom, #fff 0, #fff 10px, transparent 10px, transparent 20px),
+                repeating-linear-gradient(to bottom, #fff 0, #fff 10px, transparent 10px, transparent 20px);
+            background-size: 8px 100%, 8px 100%;
+            background-position: 5px 0, calc(100% - 5px) 0;
+            background-repeat: no-repeat;
+            transform: rotate(-2deg);
+        }
+        .film-strip img, .film-strip video {
+            width: 100%;
+            height: auto;
+            border-radius: 2px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            object-fit: cover;
+        }
+
+        /* Torn Paper Letter */
+        .torn-paper {
+            background: #f0ebd8;
+            color: #2c2c2c;
+            width: 100%;
+            max-width: 500px;
+            padding: 60px 40px 40px 40px;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            border-radius: 8px; 
+            direction: rtl;
+            text-align: right;
+            transform: rotate(1deg);
+        }
+        .red-wax-seal {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #b81d2f 0%, #7d101d 50%, #40050c 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 -2px 6px rgba(0,0,0,0.5), 0 5px 10px rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            color: #290207;
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.2), -1px -1px 2px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+        .torn-paper h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 28px;
+            text-align: center;
+            border-bottom: 2px solid rgba(90, 10, 16, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            color: #5a0a10;
+            direction: ltr;
+        }
+        .torn-paper p {
+            font-family: 'Cairo', sans-serif;
+            font-size: 17px;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 900px) {
+            .scrapbook-container {
+                flex-direction: column-reverse;
+                align-items: center;
+                gap: 40px;
+            }
+            .torn-paper, .film-strip { transform: rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STAGE 1: REALISTIC ENVELOPE -->
+    <div id="envelope-scene">
+        <div class="top-text">A Promise To You 🤍</div>
+        <div class="open-text">Open it</div>
+        
+        <div class="envelope-wrapper" id="the-envelope" onclick="openEnvelope()">
+            <div class="envelope-back"></div>
+            <!-- The physical letter inside -->
+            <div class="letter-insert"></div>
+            <div class="envelope-front"></div>
+            <div class="flap-container">
+                <div class="flap"></div>
+                <div class="seal"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAGE 2: THE SCRAPBOOK REVEAL -->
+    <div id="scrapbook-scene">
+        <div class="scrapbook-container">
+            
+            <!-- MEDIA GALLERY -->
+            <div class="film-strip">
+                <img src="photo1.jpg" alt="Night Photo">
+                <video autoplay loop muted playsinline>
+                    <source src="video1.mp4" type="video/mp4">
+                </video>
+                <img src="photo2.jpg" alt="Morning Photo">
+            </div>
+
+            <!-- THE LETTER -->
+            <div class="torn-paper">
+                <div class="red-wax-seal">♥</div>
+                <h2>A Promise To Lara</h2>
+                <p>وعد يحبيبتي اني هفضل جمبك دايماً ومش هبعد عنك ابداً يا لارا، انا بحبك من زمان اوي وفرحان جداً اننا بقينا مع بعض أخيراً فا بجد عمري ما هقبل انك تبعدي عني او اني اخسرك ابداً يحبيبتي.</p>
+                <p>وعد يلارا اني اي مره اضايقك فيها هاجي اصالحك مره واتنين وتلاته و عشرة لحد ما نتصالح ونبقى احلى مالاول كمان عشان انا مقدرش على زعلك يحبيبتي ولا اني اسيبك زعلانه مني انا بجد بحبك اوي، مقدرش اوعدك اني مش هيطلع مني حاجة تضايقك خالص، مفيش حد مبيغلطش، بس اقدر اوعدك اني لو غلطت هاجي اصلح غلطي اكيد.</p>
+                <p>وعد يروحي اني هعمل كل الي اقدر عليه عشان اكون في احسن صورة قدام عيلتك ويكونوا راضيين بيا وشايفين اني شخص كويس فعلاً ويوافقوا اني اكون مع لارا وهما متطمنين انها مع حد هيعاملها كويس و هيخاف عليها بجد.</p>
+                <p>لارا انا بموت فيكي يحبيبتي ربنا يخليكي ليا وميبعدكيش عني ابداً عشان انا بجد ماليش غيرك ومش عايز ابقى مع اي حد غيرك يحبيبتي❤️</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function openEnvelope() {
+            const envelope = document.getElementById("the-envelope");
+            const openText = document.querySelector(".open-text");
+            const topText = document.querySelector(".top-text");
+            
+            // Triggers the 3D flap and the letter sliding up
+            envelope.classList.add("open");
+            
+            // Instantly removes the text
+            openText.style.display = "none";
+            topText.style.opacity = "0";
+            
+            // Extended timeout to let the letter fully slide out before changing scenes
+            setTimeout(() => {
+                document.getElementById("envelope-scene").style.opacity = "0";
+                setTimeout(() => {
+                    document.getElementById("envelope-scene").style.display = "none";
+                    const scrapbook = document.getElementById("scrapbook-scene");
+                    scrapbook.style.display = "block"; 
+                    setTimeout(() => { scrapbook.style.opacity = "1"; }, 50);
+                }, 1000);
+            }, 2000); 
+        }
+    </script>
+
+</body>
+</html>

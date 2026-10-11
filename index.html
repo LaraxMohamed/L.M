@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>16.09</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #050508; color: #ffffff; height: 100vh; width: 100vw; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; }
+
+        /* Mood Aura Background */
+        .ambient-bg {
+            position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
+            background: radial-gradient(circle at 10% 20%, rgba(90, 30, 100, 0.4), transparent 45%),
+                        radial-gradient(circle at 90% 80%, rgba(30, 60, 130, 0.4), transparent 45%),
+                        radial-gradient(circle at 50% 50%, rgba(100, 20, 60, 0.2), transparent 50%);
+            animation: slow-drift 12s infinite alternate ease-in-out; z-index: 1; filter: blur(30px);
+            transition: background 2s ease-in-out;
+        }
+        @keyframes slow-drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-2%, -2%) scale(1.05); } }
+
+        .mobile-container { width: 100%; max-width: 420px; height: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; -ms-overflow-style: none; scrollbar-width: none; }
+        .mobile-container::-webkit-scrollbar { display: none; }
+
+        /* FIXED: Added visibility transition to stop ghost filters from bleeding through */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease-in-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s; background: transparent; padding: 40px 25px; visibility: visible; }
+        .hidden { opacity: 0; pointer-events: none; transform: scale(0.95); visibility: hidden; }
+        .slide-hidden { opacity: 0; pointer-events: none; transform: translateY(30px); visibility: hidden; }
+
+        /* Music Toggle Button */
+        .music-btn { position: absolute; top: 25px; right: 25px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; backdrop-filter: blur(10px); transition: all 0.3s ease; }
+        .music-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.15); }
+
+        /* Auth & Scanner */
+        .auth-text { color: #dcdcdc; font-size: 0.85rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 50px; font-weight: 300; }
+        .fingerprint-btn { font-size: 5.5rem; color: rgba(255,255,255,0.15); background: none; border: none; outline: none; cursor: pointer; transition: all 0.4s ease; position: relative; }
+        .fingerprint-btn.scanning { color: #ffffff; text-shadow: 0 0 30px rgba(255, 255, 255, 0.8); transform: scale(1.05); }
+        .pulse-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0); pointer-events: none; }
+        @keyframes scan-pulse { 0% { width: 100px; height: 100px; border-color: rgba(255,255,255, 0.6); } 100% { width: 280px; height: 280px; border-color: rgba(255,255,255, 0); } }
+
+        /* Password Gate */
+        .pass-container { text-align: center; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.15); padding: 40px 30px; border-radius: 28px; width: 100%; max-width: 320px; backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .pass-container h2 { font-weight: 400; letter-spacing: 1px; margin-bottom: 25px; font-size: 1.15rem; color: #eee; }
+        .pass-input { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 16px 20px; border-radius: 14px; font-size: 1.1rem; text-align: center; letter-spacing: 2px; width: 100%; margin-bottom: 20px; outline: none; transition: border 0.3s; }
+        .pass-input:focus { border-color: #ff9a9e; }
+        .pass-btn { background: #ffffff; color: #000000; border: none; padding: 14px 35px; border-radius: 30px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+        .pass-btn:active { transform: scale(0.95); }
+        .error-msg { color: #ff4757; font-size: 0.85rem; margin-top: 15px; opacity: 0; transition: opacity 0.3s; }
+
+        /* Dashboard */
+        #dashboard-screen { justify-content: flex-start; }
+        .header-profile { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px; margin-top: 10px; }
+        .avatar-container { width: 80px; height: 80px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); margin-bottom: 15px; animation: float 4s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .custom-avatar { width: 100%; height: 100%; border-radius: 50%; background-color: #111118; border: 2px solid #08080c; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 500; color: #fff; }
+        .custom-avatar span { font-size: 0.8em; margin: 0 4px; }
+        .greeting h1 { font-size: 1.4rem; font-weight: 500; letter-spacing: 1px; color: #ffffff; margin-bottom: 4px; }
+        .greeting p { color: #a0a0b0; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.5px; }
+
+        .streak-pill { background: rgba(255, 154, 158, 0.15); border: 1px solid rgba(255, 154, 158, 0.3); color: #ff9a9e; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+        .counter-widget { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(25px); text-align: center; }
+        .counter-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; color: #cccccc; margin-bottom: 15px; }
+        .time-blocks { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
+        .time-block { display: flex; flex-direction: column; align-items: center; width: 22%; }
+        .time-value { font-size: 1.5rem; font-weight: 500; color: #ffffff; }
+        .time-label { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; }
+        .tile { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 22px; padding: 35px 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); text-decoration: none; color: white; }
+        .tile:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.1); }
+        .tile-icon { font-size: 2.2rem; color: #ffffff; }
+        .tile-full { grid-column: span 2; flex-direction: row; gap: 15px; padding: 20px; background: linear-gradient(135deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%); }
+        .tile-title { font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px; }
+        .tile-vault .tile-icon { color: #f6e58d; }
+        .tile-signal .tile-icon { color: #ff9ff3; }
+
+        /* Terminal Chat */
+        #communication-screen { justify-content: space-between; padding: 20px 15px; }
+        .nav-header { width: 100%; display: flex; align-items: center; padding-top: 15px; margin-bottom: 15px; }
+        .back-btn { font-size: 1.2rem; color: #aaa; cursor: pointer; padding: 10px 10px 10px 0; transition: color 0.3s; }
+        .term-header { font-weight: 500; font-size: 1.1rem; margin-left: 10px; }
+
+        .terminal-box { background: transparent; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding: 10px 5px; -ms-overflow-style: none; scrollbar-width: none; }
+        .terminal-box::-webkit-scrollbar { display: none; }
+        .msg { display: flex; flex-direction: column; width: 100%; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: bottom center; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .msg.incoming { align-items: flex-start; }
+        .msg.outgoing { align-items: flex-end; }
+        .msg-bubble { padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; max-width: 80%; line-height: 1.4; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .msg.incoming .msg-bubble { background: rgba(255, 255, 255, 0.1); border-bottom-left-radius: 4px; color: #fff; backdrop-filter: blur(10px); }
+        .msg.outgoing .msg-bubble { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border-bottom-right-radius: 4px; color: #111; font-weight: 500; }
+        .msg-status { font-size: 0.65rem; color: #aaa; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+        
+        .chat-footer { width: 100%; display: flex; flex-direction: column; gap: 10px; background: rgba(10, 10, 15, 0.7); backdrop-filter: blur(20px); padding: 15px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 -5px 25px rgba(0,0,0,0.3); }
+        .quick-actions-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
+        .quick-actions-row::-webkit-scrollbar { display: none; }
+        .chip-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 8px 16px; font-size: 0.85rem; color: #eee; white-space: nowrap; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .chip-urgent { border-color: rgba(255, 71, 87, 0.4); color: #ff6b81; }
+        .input-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .chat-input { flex-grow: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px 16px; border-radius: 20px; font-size: 0.95rem; outline: none; transition: border 0.3s; }
+        .send-btn { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none; color: #111; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; }
+        
+        .particle { position: absolute; pointer-events: none; font-size: 1.2rem; animation: floatUp 1.5s ease-out forwards; z-index: 100; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5) rotate(20deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Background Audio Setup -->
+    <audio id="bg-music" loop>
+        <source src="wayah.m4a" type="audio/mp4">
+    </audio>
+
+    <div class="ambient-bg" id="aura-bg"></div>
+
+    <div class="mobile-container">
+        
+        <!-- Music Control Button -->
+        <button id="music-toggle" class="music-btn" onclick="toggleMusic()">
+            <i class="fa-solid fa-volume-xmark"></i>
+        </button>
+
+        <!-- SCREEN 1: SCANNER -->
+        <div id="scanner-screen" class="screen">
+            <p class="auth-text" id="status-text">Awaiting Identity</p>
+            <button class="fingerprint-btn" id="fingerprint"><i class="fa-solid fa-fingerprint"></i><div class="pulse-ring" id="ring1"></div></button>
+        </div>
+
+        <!-- SCREEN 2: PASSWORD GATE -->
+        <div id="password-screen" class="screen hidden">
+            <div class="pass-container">
+                <h2>Security Key</h2>
+                <input type="text" id="pass-input" class="pass-input" placeholder="DD/MM/YYYY" autocomplete="off">
+                <button class="pass-btn" onclick="checkPassword()">Unlock</button>
+                <p id="pass-error" class="error-msg">Incorrect Key.</p>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: DASHBOARD -->
+        <div id="dashboard-screen" class="screen slide-hidden">
+            <div class="header-profile">
+                <div class="avatar-container"><div class="custom-avatar">L <span>❤️</span> M</div></div>
+                <div class="greeting"><h1 id="dynamic-greeting">System 16.09</h1><p>Connection active.</p></div>
+                <div class="streak-pill"><i class="fa-solid fa-fire"></i><span id="streak-count">Day 1</span></div>
+            </div>
+
+            <div class="counter-widget">
+                <div class="counter-title">Since 16.09.2026</div>
+                <div class="time-blocks">
+                    <div class="time-block"><span class="time-value" id="count-days">0</span><span class="time-label">Days</span></div>
+                    <div class="time-block"><span class="time-value" id="count-hours">0</span><span class="time-label">Hours</span></div>
+                    <div class="time-block"><span class="time-value" id="count-mins">0</span><span class="time-label">Mins</span></div>
+                    <div class="time-block"><span class="time-value" id="count-secs">0</span><span class="time-label">Secs</span></div>
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <!-- FIXED: HTML Tag structure restored for the Promise Button -->
+                <a href="promise.html" class="tile tile-full">
+                    <i class="fa-solid fa-envelope-open-text tile-icon" style="font-size: 1.8rem; margin-bottom: 5px;"></i>
+                    <div class="tile-title">The Promise</div>
+                </a>
+                
+                <div class="tile tile-vault" onclick="window.open('https://drive.google.com/drive/folders/1_YeKPVTD_UdM8eOKV3e_R_SaPUmmz2c3?usp=sharing', '_blank')"><i class="fa-solid fa-lock tile-icon"></i></div>
+                <div class="tile tile-signal" onclick="openCommMenu()"><i class="fa-solid fa-paper-plane tile-icon"></i></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: ADVANCED TERMINAL -->
+        <div id="communication-screen" class="screen slide-hidden">
+            <div class="nav-header"><i class="fa-solid fa-chevron-left back-btn" onclick="closeCommMenu()"></i><div class="term-header">Terminal</div></div>
+            <div class="terminal-box" id="chat-history"></div>
+            
+            <div class="chat-footer">
+                <div class="quick-actions-row">
+                    <div class="chip-btn" onclick="sendQuickNote(this, 'I love you ❤️', '❤️')"><i class="fa-solid fa-heart" style="color:#ff9a9e;"></i> I love you</div>
+                    <div class="chip-btn" onclick="sendQuickNote(this, 'I miss you! 🫂', '✨')"><i class="fa-solid fa-hands-holding-circle" style="color:#82ccdd;"></i> I miss you</div>
+                    <div class="chip-btn chip-urgent" onclick="sendQuickNote(this, 'We need to talk.', '⚠️')"><i class="fa-solid fa-triangle-exclamation"></i> Urgent</div>
+                </div>
+                <div class="input-row">
+                    <input type="text" id="custom-msg" class="chat-input" placeholder="Type a message..." autocomplete="off">
+                    <button class="send-btn" onclick="sendCustomNote(this)"><i class="fa-solid fa-arrow-up"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrjUFPcoAUuvUGTofcZOjOaT8__dLjdJU",
+            authDomain: "project-6743089200855905181.firebaseapp.com",
+            databaseURL: "https://project-6743089200855905181-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "project-6743089200855905181",
+            storageBucket: "project-6743089200855905181.firebasestorage.app",
+            messagingSenderId: "187386380249",
+            appId: "1:187386380249:web:9185a2d7c615d890efa3c8",
+            measurementId: "G-XQLCMR72R6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.sendToDatabase = function(messageText, type) {
+            const chatRef = ref(db, 'messages');
+            push(chatRef, {
+                sender: 'Lara',
+                text: messageText,
+                status: 'Delivered',
+                timestamp: serverTimestamp(),
+                msgType: type 
+            });
+
+            const moodRef = ref(db, 'aura');
+            if (type === 'urgent') push(moodRef, { state: 'crimson' });
+            else push(moodRef, { state: 'pink' });
+        }
+
+        const chatHistory = document.getElementById('chat-history');
+        onValue(ref(db, 'messages'), (snapshot) => {
+            chatHistory.innerHTML = ''; 
+            snapshot.forEach((childSnapshot) => {
+                const msg = childSnapshot.val();
+                const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const cssClass = msg.sender === 'Lara' ? 'outgoing' : 'incoming';
+                const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot"></div> Delivered • ${time}` : `Mohamed • ${time}`;
+                
+                chatHistory.insertAdjacentHTML('beforeend', `
+                    <div class="msg ${cssClass}">
+                        <div class="msg-bubble">${msg.text}</div>
+                        <div class="msg-status">${statusHtml}</div>
+                    </div>
+                `);
+            });
+            setTimeout(() => chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: 'smooth' }), 50);
+        });
+
+        const auraBg = document.getElementById('aura-bg');
+        onValue(ref(db, 'aura'), (snapshot) => {
+            let latestState = 'pink';
+            snapshot.forEach((child) => { latestState = child.val().state; });
+            
+            if (latestState === 'crimson') {
+                auraBg.style.background = 'radial-gradient(circle at 50% 50%, rgba(180, 20, 20, 0.4), transparent 50%), radial-gradient(circle at 10% 20%, rgba(100, 0, 0, 0.6), transparent 45%)';
+            } else {
+                auraBg.style.background = 'radial-gradient(circle at 10% 20%, rgba(90, 30, 100, 0.4), transparent 45%), radial-gradient(circle at 90% 80%, rgba(30, 60, 130, 0.4), transparent 45%), radial-gradient(circle at 50% 50%, rgba(100, 20, 60, 0.2), transparent 50%)';
+            }
+        });
+    </script>
+
+    <!-- UI, Music, and Scanner Logic -->
+    <script>
+        // --- MUSIC LOGIC ---
+        const bgMusic = document.getElementById('bg-music');
+        bgMusic.volume = 0.15; // Kept at a low background level (15%)
+        let isMusicPlaying = false;
+
+        function toggleMusic() {
+            const icon = document.querySelector('#music-toggle i');
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                icon.className = 'fa-solid fa-volume-xmark';
+            } else {
+                bgMusic.play().catch(e => console.log("Audio block:", e));
+                icon.className = 'fa-solid fa-volume-high';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+
+        // --- DASHBOARD COUNTER ---
+        function startCounter() {
+            const startDate = new Date("2026-09-16T00:00:00").getTime();
+            setInterval(() => {
+                const distance = new Date().getTime() - startDate;
+                if (distance > 0) {
+                    document.getElementById("count-days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    document.getElementById("count-hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                    document.getElementById("count-mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                    document.getElementById("count-secs").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+                }
+            }, 1000);
+        }
+
+        // --- SCANNER LOGIC ---
+        const fpBtn = document.getElementById('fingerprint'), sText = document.getElementById('status-text'), ring = document.getElementById('ring1');
+        let scanTimer, isScanned = false;
+        
+        function startScan(e) { 
+            if(isScanned) return; if(e) e.preventDefault(); 
+            fpBtn.classList.add('scanning'); sText.innerText = "Verifying..."; sText.style.color = "#fff"; ring.style.animation = "scan-pulse 1s ease-out infinite"; 
+            if (navigator.vibrate) navigator.vibrate([200, 300, 200, 300, 200]); 
+            scanTimer = setTimeout(triggerPassword, 2500); 
+        }
+        
+        function stopScan(e) { 
+            if(isScanned) return; if(e) e.preventDefault(); 
+            clearTimeout(scanTimer); fpBtn.classList.remove('scanning'); sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; ring.style.animation = "none"; 
+            if (navigator.vibrate) navigator.vibrate(0); 
+        }
+        
+        function triggerPassword() { 
+            isScanned = true; 
+            sText.innerText = "Biometrics Accepted."; 
+            sText.style.color = "#4ade80"; 
+            
+            // Try to auto-start the music smoothly when she verifies her fingerprint
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    document.querySelector('#music-toggle i').className = 'fa-solid fa-volume-high';
+                    isMusicPlaying = true;
+                }).catch(e => console.log("Autoplay blocked until manual click"));
+            }
+
+            setTimeout(() => { 
+                document.getElementById('scanner-screen').classList.add('hidden'); 
+                setTimeout(() => { 
+                    document.getElementById('scanner-screen').style.display = 'none'; 
+                    document.getElementById('password-screen').classList.remove('hidden'); 
+                    document.getElementById('pass-input').focus();
+                }, 600); 
+            }, 500); 
+        }
+        
+        fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchend', stopScan); fpBtn.addEventListener('touchcancel', stopScan);
+
+        // --- PASSWORD GATE ---
+        document.getElementById('pass-input').addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
+        function checkPassword() {
+            const val = document.getElementById('pass-input').value.trim();
+            if (val === "16/9/2026" || val === "16/09/2026") {
+                document.getElementById('password-screen').classList.add('hidden');
+                startCounter();
+                
+                // Dynamic greeting logic based on Cairo time
+                const hour = new Date().getHours();
+                const greetingEl = document.getElementById('dynamic-greeting');
+                if (hour >= 5 && hour < 12) greetingEl.innerText = "Sabah elkher yhabebte❤️.";
+                else if (hour >= 12 && hour < 18) greetingEl.innerText = "Ahlan habebte❤️.";
+                else greetingEl.innerText = "Ahlan Habebte❤️.";
+
+                setTimeout(() => { document.getElementById('password-screen').style.display = 'none'; document.getElementById('dashboard-screen').classList.remove('slide-hidden'); document.getElementById('dashboard-screen').style.pointerEvents = 'auto'; }, 600);
+            } else {
+                const passIn = document.getElementById('pass-input'); passIn.style.borderColor = "#ff4757"; passIn.style.transform = "translateX(-10px)";
+                setTimeout(() => passIn.style.transform = "translateX(10px)", 50); setTimeout(() => passIn.style.transform = "translateX(0)", 100);
+            }
+        }
+
+        // --- NAVIGATION & TERMINAL EFFECTS ---
+        const cScreen = document.getElementById('communication-screen'), dScreen = document.getElementById('dashboard-screen');
+        function openCommMenu() { dScreen.classList.add('slide-hidden'); setTimeout(() => { dScreen.style.display = 'none'; cScreen.style.display = 'flex'; setTimeout(() => cScreen.classList.remove('slide-hidden'), 50); }, 600); }
+        function closeCommMenu() { cScreen.classList.add('slide-hidden'); setTimeout(() => { cScreen.style.display = 'none'; dScreen.style.display = 'flex'; setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); }, 600); }
+
+        function sendCustomNote(btn) {
+            const msg = document.getElementById('custom-msg').value.trim();
+            if (msg === "") return;
+            window.sendToDatabase(msg, 'love');
+            spawnParticles('✨', btn);
+            document.getElementById('custom-msg').value = "";
+        }
+        function sendQuickNote(btn, msg, emoji) {
+            const type = msg.includes("talk") ? 'urgent' : 'love';
+            window.sendToDatabase(msg, type);
+            spawnParticles(emoji, btn);
+        }
+
+        function spawnParticles(emoji, element) {
+            const rect = element.getBoundingClientRect(), container = document.body;
+            for(let i = 0; i < 5; i++) {
+                const p = document.createElement('div'); p.className = 'particle'; p.innerText = emoji;
+                p.style.left = `${rect.left + (rect.width/2) + ((Math.random()-0.5)*40)}px`; p.style.top = `${rect.top + (rect.height/2)}px`;
+                p.style.animationDuration = `${1 + Math.random()}s`; container.appendChild(p);
+                setTimeout(() => p.remove(), 2000);
+            }
+        }
+    </script>
+</body>
+</html>
