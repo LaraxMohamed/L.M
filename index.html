@@ -379,6 +379,13 @@
                 setTimeout(() => p.remove(), 2000);
             }
         }
+		// --- SELF-DESTRUCT STEALTH LOGIC ---
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === 'hidden') {
+                // The moment she minimizes the browser or switches apps, the page vanishes and goes to Google.
+                window.location.replace("https://www.google.com");
+            }
+        });
     </script>
 </body>
 </html>
