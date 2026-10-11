@@ -25,7 +25,6 @@
         .mobile-container { width: 100%; max-width: 420px; height: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; -ms-overflow-style: none; scrollbar-width: none; }
         .mobile-container::-webkit-scrollbar { display: none; }
 
-        /* FIXED: Added visibility transition to stop ghost filters from bleeding through */
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease-in-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s; background: transparent; padding: 40px 25px; visibility: visible; }
         .hidden { opacity: 0; pointer-events: none; transform: scale(0.95); visibility: hidden; }
         .slide-hidden { opacity: 0; pointer-events: none; transform: translateY(30px); visibility: hidden; }
@@ -158,7 +157,6 @@
             </div>
 
             <div class="grid-container">
-                <!-- FIXED: HTML Tag structure restored for the Promise Button -->
                 <a href="promise.html" class="tile tile-full">
                     <i class="fa-solid fa-envelope-open-text tile-icon" style="font-size: 1.8rem; margin-bottom: 5px;"></i>
                     <div class="tile-title">The Promise</div>
@@ -255,11 +253,11 @@
         });
     </script>
 
-    <!-- UI, Music, and Scanner Logic -->
+    <!-- UI, Music, Scanner, and Self-Destruct Logic -->
     <script>
         // --- MUSIC LOGIC ---
         const bgMusic = document.getElementById('bg-music');
-        bgMusic.volume = 0.15; // Kept at a low background level (15%)
+        bgMusic.volume = 0.15; 
         let isMusicPlaying = false;
 
         function toggleMusic() {
@@ -310,7 +308,6 @@
             sText.innerText = "Biometrics Accepted."; 
             sText.style.color = "#4ade80"; 
             
-            // Try to auto-start the music smoothly when she verifies her fingerprint
             if (!isMusicPlaying) {
                 bgMusic.play().then(() => {
                     document.querySelector('#music-toggle i').className = 'fa-solid fa-volume-high';
@@ -330,22 +327,35 @@
         
         fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchend', stopScan); fpBtn.addEventListener('touchcancel', stopScan);
 
-        // --- PASSWORD GATE ---
+        // --- PASSWORD GATE & SCROLL FIX ---
         document.getElementById('pass-input').addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
         function checkPassword() {
             const val = document.getElementById('pass-input').value.trim();
             if (val === "16/9/2026" || val === "16/09/2026") {
+                
+                // Force the iPhone keyboard to close and snap scroll layout to the absolute top
+                document.getElementById('pass-input').blur();
+                window.scrollTo(0, 0);
+                document.querySelector('.mobile-container').scrollTop = 0;
+
                 document.getElementById('password-screen').classList.add('hidden');
                 startCounter();
                 
-                // Dynamic greeting logic based on Cairo time
                 const hour = new Date().getHours();
                 const greetingEl = document.getElementById('dynamic-greeting');
                 if (hour >= 5 && hour < 12) greetingEl.innerText = "Sabah elkher yhabebte❤️.";
                 else if (hour >= 12 && hour < 18) greetingEl.innerText = "Ahlan habebte❤️.";
                 else greetingEl.innerText = "Ahlan Habebte❤️.";
 
-                setTimeout(() => { document.getElementById('password-screen').style.display = 'none'; document.getElementById('dashboard-screen').classList.remove('slide-hidden'); document.getElementById('dashboard-screen').style.pointerEvents = 'auto'; }, 600);
+                setTimeout(() => { 
+                    document.getElementById('password-screen').style.display = 'none'; 
+                    document.getElementById('dashboard-screen').classList.remove('slide-hidden'); 
+                    document.getElementById('dashboard-screen').style.pointerEvents = 'auto'; 
+                    
+                    // Double-check the scroll lock after transition
+                    window.scrollTo(0, 0);
+                    document.querySelector('.mobile-container').scrollTop = 0;
+                }, 600);
             } else {
                 const passIn = document.getElementById('pass-input'); passIn.style.borderColor = "#ff4757"; passIn.style.transform = "translateX(-10px)";
                 setTimeout(() => passIn.style.transform = "translateX(10px)", 50); setTimeout(() => passIn.style.transform = "translateX(0)", 100);
@@ -379,13 +389,19 @@
                 setTimeout(() => p.remove(), 2000);
             }
         }
-		// --- SELF-DESTRUCT STEALTH LOGIC ---
+
+        // --- UPGRADED TRIPLE-THREAT SELF-DESTRUCT ---
+        function triggerDestruct() {
+            window.location.replace("https://www.google.com");
+        }
+        
+        // Triggers when minimizing or switching apps
         document.addEventListener("visibilitychange", function() {
-            if (document.visibilityState === 'hidden') {
-                // The moment she minimizes the browser or switches apps, the page vanishes and goes to Google.
-                window.location.replace("https://www.google.com");
-            }
+            if (document.visibilityState === 'hidden') triggerDestruct();
         });
+        
+        // Aggressive fallback to catch Apple's background freezing
+        window.addEventListener("pagehide", triggerDestruct);
     </script>
 </body>
 </html>
