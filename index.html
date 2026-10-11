@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- Dynamic Safari Status Bar Color -->
     <meta name="theme-color" id="theme-color-meta" content="#1a050f">
     
     <title>16.09</title>
@@ -14,9 +13,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* THE NOTCH FIX: The background color is now controlled by JS to match the aura exactly */
         body { 
-            background-color: #1a050f; /* Base Dark Pink */
+            background-color: #1a050f; 
             color: #ffffff; 
             width: 100vw; height: 100dvh;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -25,7 +23,6 @@
             transition: background-color 1.5s ease;
         }
 
-        /* High-End Cross-Fading Auras with Distinct Colors */
         .ambient-layer {
             position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
             opacity: 0; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -35,27 +32,26 @@
         }
         .ambient-layer.active { opacity: 1; }
         
-        /* Bright, Soft Pastel Pink for Love */
+        /* Soft, warm, pastel pink for Love */
         #aura-love {
-            background: radial-gradient(circle at 10% 20%, rgba(255, 154, 158, 0.4), transparent 60%),
-                        radial-gradient(circle at 90% 80%, rgba(254, 207, 239, 0.4), transparent 60%),
-                        radial-gradient(circle at 50% 50%, rgba(255, 182, 193, 0.3), transparent 60%);
+            background: radial-gradient(circle at 10% 20%, rgba(255, 130, 160, 0.4), transparent 60%),
+                        radial-gradient(circle at 90% 80%, rgba(255, 180, 220, 0.4), transparent 60%),
+                        radial-gradient(circle at 50% 50%, rgba(255, 150, 180, 0.3), transparent 60%);
         }
-        /* Calming Violet for Miss You */
+        /* Low, deep, moody dark purple for Miss You */
         #aura-miss {
-            background: radial-gradient(circle at 10% 20%, rgba(90, 50, 220, 0.4), transparent 60%),
-                        radial-gradient(circle at 90% 80%, rgba(120, 80, 255, 0.4), transparent 60%),
-                        radial-gradient(circle at 50% 50%, rgba(50, 20, 150, 0.3), transparent 60%);
+            background: radial-gradient(circle at 10% 20%, rgba(70, 30, 140, 0.4), transparent 60%),
+                        radial-gradient(circle at 90% 80%, rgba(90, 40, 170, 0.4), transparent 60%),
+                        radial-gradient(circle at 50% 50%, rgba(50, 20, 110, 0.3), transparent 60%);
         }
-        /* Deep, Dark Blood-Red for Urgent/Angry */
+        /* Pure, dark blood-crimson for Urgent/Angry */
         #aura-urgent {
-            background: radial-gradient(circle at 10% 20%, rgba(220, 0, 0, 0.5), transparent 60%),
-                        radial-gradient(circle at 90% 80%, rgba(150, 0, 0, 0.55), transparent 60%),
+            background: radial-gradient(circle at 10% 20%, rgba(180, 0, 0, 0.5), transparent 60%),
+                        radial-gradient(circle at 90% 80%, rgba(130, 0, 0, 0.55), transparent 60%),
                         radial-gradient(circle at 50% 50%, rgba(90, 0, 0, 0.4), transparent 60%);
         }
         @keyframes slow-drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-2%, -2%) scale(1.05); } }
 
-        /* Continuous Background Particles */
         #ambient-fx { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: hidden; }
         .bg-particle { position: absolute; bottom: -50px; pointer-events: none; animation: floatToTop linear forwards; will-change: transform, opacity; }
         @keyframes floatToTop { to { transform: translateY(-120vh) rotate(45deg); opacity: 0; } }
@@ -63,7 +59,6 @@
         .mobile-container { width: 100%; max-width: 420px; height: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; -ms-overflow-style: none; scrollbar-width: none; }
         .mobile-container::-webkit-scrollbar { display: none; }
 
-        /* Safe area padding applied dynamically to the individual screens */
         .screen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
@@ -77,14 +72,12 @@
         .music-btn { position: absolute; top: calc(15px + env(safe-area-inset-top)); right: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; backdrop-filter: blur(12px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .music-btn:active { transform: scale(0.85); background: rgba(255, 255, 255, 0.2); }
 
-        /* Scanner */
         .auth-text { color: #dcdcdc; font-size: 0.85rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 50px; font-weight: 300; transition: color 0.3s, text-shadow 0.3s; user-select: none; padding: 15px; cursor: pointer; }
         .fingerprint-btn { font-size: 5.5rem; color: rgba(255,255,255,0.12); background: none; border: none; outline: none; cursor: pointer; transition: all 0.4s ease; position: relative; }
         .fingerprint-btn.scanning { color: #ffffff; text-shadow: 0 0 35px rgba(255, 255, 255, 0.9); transform: scale(1.08); }
         .pulse-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0); pointer-events: none; }
         @keyframes scan-pulse { 0% { width: 100px; height: 100px; border-color: rgba(255,255,255, 0.7); } 100% { width: 300px; height: 300px; border-color: rgba(255,255,255, 0); } }
 
-        /* Dashboard */
         #dashboard-screen { justify-content: flex-start; padding-top: calc(60px + env(safe-area-inset-top)); }
         .header-profile { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 35px; }
         .avatar-container { width: 85px; height: 85px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); margin-bottom: 15px; animation: float 4s ease-in-out infinite; box-shadow: 0 10px 25px rgba(255, 154, 158, 0.3); }
@@ -114,7 +107,6 @@
         .tile-signal .tile-icon { color: #ff9ff3; filter: drop-shadow(0 0 10px rgba(255, 159, 243, 0.3)); animation: floatIcon 3s infinite ease-in-out; }
         @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
-        /* Premium Chat Screen */
         #communication-screen { justify-content: space-between; padding: calc(20px + env(safe-area-inset-top)) 15px env(safe-area-inset-bottom) 15px; }
         .nav-header { width: 100%; display: flex; align-items: center; padding-top: 10px; margin-bottom: 10px; z-index: 10; }
         .back-btn { font-size: 1.3rem; color: #ccc; cursor: pointer; padding: 10px 15px 10px 0; transition: color 0.3s; }
@@ -123,7 +115,6 @@
         .terminal-box { background: transparent; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 10px 5px; -ms-overflow-style: none; scrollbar-width: none; z-index: 10; }
         .terminal-box::-webkit-scrollbar { display: none; }
         
-        /* GPU Accelerated Smooth Chat Physics */
         .msg { 
             display: flex; flex-direction: column; width: 100%; 
             animation: floatIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
@@ -164,12 +155,10 @@
         <source src="wayah.m4a" type="audio/mp4">
     </audio>
 
-    <!-- Cross-fading Aura Layers -->
     <div id="aura-love" class="ambient-layer active"></div>
     <div id="aura-miss" class="ambient-layer"></div>
     <div id="aura-urgent" class="ambient-layer"></div>
     
-    <!-- Background Floating Particles -->
     <div id="ambient-fx"></div>
 
     <div class="mobile-container">
@@ -178,9 +167,7 @@
             <i class="fa-solid fa-volume-xmark"></i>
         </button>
 
-        <!-- SECURE FINGERPRINT SCANNER -->
         <div id="scanner-screen" class="screen">
-            <!-- The secret trigger: 1 Tap on this text arms the scanner -->
             <p class="auth-text" id="status-text">Awaiting Identity</p>
             <button class="fingerprint-btn" id="fingerprint"><i class="fa-solid fa-fingerprint"></i><div class="pulse-ring" id="ring1"></div></button>
         </div>
@@ -189,7 +176,7 @@
             <div class="header-profile">
                 <div class="avatar-container"><div class="custom-avatar">L <span>❤️</span> M</div></div>
                 <div class="greeting"><h1 id="dynamic-greeting">System 16.09</h1></div>
-                <div class="streak-pill"><i class="fa-solid fa-fire"></i><span id="streak-count">Day 1</span></div>
+                <div class="streak-pill"><i class="fa-solid fa-fire"></i><span id="streak-count">0</span></div>
             </div>
 
             <div class="counter-widget">
@@ -231,7 +218,6 @@
         </div>
     </div>
 
-    <!-- Firebase DB Logic - ZERO JITTER RENDER SYSTEM -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
@@ -261,7 +247,6 @@
         const chatHistory = document.getElementById('chat-history');
         
         onValue(ref(db, 'messages'), (snapshot) => {
-            // WE NO LONGER WIPE THE HTML. This completely cures the vibration bug.
             currentMessages = [];
             
             if(snapshot.exists()) {
@@ -280,13 +265,11 @@
                     const existingMsg = document.getElementById('msg-' + msgKey);
                     
                     if (existingMsg) {
-                        // If message is already on screen, just update the status dot (No animation glitch!)
                         const statusDiv = existingMsg.querySelector('.msg-status');
                         if (statusDiv.innerHTML !== statusHtml) {
                             statusDiv.innerHTML = statusHtml;
                         }
                     } else {
-                        // If it's a completely new message, inject it at the bottom so it animates beautifully
                         chatHistory.insertAdjacentHTML('beforeend', `
                             <div class="msg ${cssClass}" id="msg-${msgKey}">
                                 <div class="msg-bubble">${msg.text}</div>
@@ -294,7 +277,6 @@
                             </div>
                         `);
                         
-                        // Snap scroll to bottom only when a brand new message arrives
                         setTimeout(() => { 
                             chatHistory.scrollTop = chatHistory.scrollHeight; 
                         }, 10);
@@ -302,6 +284,36 @@
                 });
             }
             if (window.isChatOpen) window.markUnreadAsSeen();
+
+            // DYNAMIC SNAPCHAT STREAK LOGIC
+            const validMsgs = currentMessages.filter(m => m.timestamp);
+            if (validMsgs.length === 0) {
+                document.getElementById('streak-count').innerText = "0";
+            } else {
+                const getStr = (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                
+                const uniqueDates = [...new Set(validMsgs.map(m => getStr(new Date(m.timestamp))))].sort().reverse();
+                
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                let streak = 0;
+                // If there's a message from today or yesterday, start counting streak backwards
+                if (uniqueDates[0] === getStr(today) || uniqueDates[0] === getStr(yesterday)) {
+                    streak = 1;
+                    let currDate = new Date(uniqueDates[0] + 'T12:00:00'); // Safe mid-day anchor
+                    for (let i = 1; i < uniqueDates.length; i++) {
+                        currDate.setDate(currDate.getDate() - 1);
+                        if (uniqueDates[i] === getStr(currDate)) {
+                            streak++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                document.getElementById('streak-count').innerText = streak.toString();
+            }
         });
 
         window.markUnreadAsSeen = function() {
@@ -324,26 +336,24 @@
             layerMiss.classList.remove('active');
             layerUrgent.classList.remove('active');
             
-            // Activate Layer & Update BOTH the body background and Safari Address Bar perfectly
             if (latestState === 'urgent') {
                 layerUrgent.classList.add('active');
-                document.body.style.backgroundColor = '#1a0000'; // Deep Dark Red Fix
-                themeMeta.content = '#1a0000'; 
+                document.body.style.backgroundColor = '#110000'; 
+                themeMeta.content = '#110000'; 
             }
             else if (latestState === 'miss') {
                 layerMiss.classList.add('active');
-                document.body.style.backgroundColor = '#0d051a'; // Deep Dark Purple Fix
-                themeMeta.content = '#0d051a'; 
+                document.body.style.backgroundColor = '#0a0612'; 
+                themeMeta.content = '#0a0612'; 
             }
             else {
                 layerLove.classList.add('active');
-                document.body.style.backgroundColor = '#1a050f'; // Deep Dark Pink Fix
+                document.body.style.backgroundColor = '#1a050f'; 
                 themeMeta.content = '#1a050f'; 
             }
         });
     </script>
 
-    <!-- App Logic & Decoy Scanner -->
     <script>
         const bgMusic = document.getElementById('bg-music');
         bgMusic.volume = 0.15; 
@@ -369,7 +379,6 @@
             }, 1000);
         }
 
-        // --- SINGLE-TAP DECOY SCANNER LOGIC ---
         const sText = document.getElementById('status-text');
         const fpBtn = document.getElementById('fingerprint');
         const ring = document.getElementById('ring1');
@@ -378,7 +387,6 @@
         let scanTimer;
         let isScanned = false;
 
-        // Hidden lock trigger (1 Tap)
         sText.addEventListener('touchstart', handleSecretTap);
         sText.addEventListener('mousedown', handleSecretTap);
 
@@ -407,7 +415,6 @@
         
         function triggerAccess() { 
             if (isArmed) {
-                // Success: She armed it
                 isScanned = true; 
                 sText.innerText = "Biometrics Accepted."; sText.style.color = "#4ade80"; 
                 
@@ -433,7 +440,6 @@
                 }, 800); 
 
             } else {
-                // Trap: Someone else tried it without tapping the text first
                 sText.innerText = "Biometrics Unrecognized."; sText.style.color = "#ff4757"; sText.style.textShadow = "none";
                 fpBtn.classList.remove('scanning'); 
                 ring.style.animation = "none"; 
@@ -446,7 +452,6 @@
         
         fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchend', stopScan); fpBtn.addEventListener('touchcancel', stopScan);
 
-        // --- DASHBOARD & CHAT LOGIC ---
         const cScreen = document.getElementById('communication-screen'), dScreen = document.getElementById('dashboard-screen');
         window.openCommMenu = function() { 
             dScreen.classList.add('slide-hidden'); 
