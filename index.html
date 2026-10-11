@@ -278,7 +278,6 @@
                 });
             }
             
-            // THE FIX: Instantly wipe elements that were deleted by Admin
             Array.from(chatHistory.children).forEach(child => {
                 if (!incomingKeys.has(child.id.replace('msg-', ''))) child.remove();
             });
@@ -298,7 +297,6 @@
             recalcStreak();
         });
 
-        // Dynamic Anchor Streak Engine
         function recalcStreak() {
             const validMsgs = currentMessages.filter(m => m.timestamp && m.timestamp >= streakAnchor);
             let mathStreak = 0;
@@ -372,6 +370,7 @@
         const bgMusic = document.getElementById('bg-music');
         bgMusic.volume = 0.15; 
         let isMusicPlaying = false;
+        let counterInterval; // THE FIX: Prevent overlapping timers
 
         function toggleMusic() {
             const icon = document.querySelector('#music-toggle i');
@@ -381,8 +380,9 @@
         }
 
         function startCounter() {
+            if (counterInterval) clearInterval(counterInterval);
             const startDate = new Date("2026-09-16T00:00:00").getTime();
-            setInterval(() => {
+            counterInterval = setInterval(() => {
                 const distance = new Date().getTime() - startDate;
                 if (distance > 0) {
                     document.getElementById("count-days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -448,8 +448,15 @@
 
                     setTimeout(() => { 
                         document.getElementById('scanner-screen').style.display = 'none'; 
-                        document.getElementById('dashboard-screen').classList.remove('slide-hidden'); 
-                        document.getElementById('dashboard-screen').style.pointerEvents = 'auto'; 
+                        
+                        // THE FIX: Explicitly turn the dashboard 'power' back on before fading it in
+                        const dScreen = document.getElementById('dashboard-screen');
+                        dScreen.style.display = 'flex'; 
+                        
+                        setTimeout(() => {
+                            dScreen.classList.remove('slide-hidden'); 
+                            dScreen.style.pointerEvents = 'auto'; 
+                        }, 50);
                     }, 400); 
                 }, 800); 
 
@@ -464,13 +471,14 @@
             }
         }
         
-        fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchend', stopScan); fpBtn.addEventListener('touchcancel', stopScan);
+        fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchcancel', stopScan);
 
         const cScreen = document.getElementById('communication-screen'), dScreen = document.getElementById('dashboard-screen');
         window.openCommMenu = function() { 
             dScreen.classList.add('slide-hidden'); 
             setTimeout(() => { 
-                dScreen.style.display = 'none'; cScreen.style.display = 'flex'; 
+                dScreen.style.display = 'none'; 
+                cScreen.style.display = 'flex'; 
                 setTimeout(() => { 
                     cScreen.classList.remove('slide-hidden'); 
                     window.isChatOpen = true; 
@@ -482,7 +490,8 @@
             window.isChatOpen = false; 
             cScreen.classList.add('slide-hidden'); 
             setTimeout(() => { 
-                cScreen.style.display = 'none'; dScreen.style.display = 'flex'; 
+                cScreen.style.display = 'none'; 
+                dScreen.style.display = 'flex'; 
                 setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
             }, 400); 
         }
@@ -539,7 +548,7 @@
             setTimeout(() => p.remove(), 12000); 
         }, 800); 
 
-        // THE FIX: Reset UI safely without causing white screens
+        // Safely wipe UI elements to prevent white-screen locks
         window.triggerDestruct = function() {
             document.getElementById('dashboard-screen').style.display = 'none';
             document.getElementById('dashboard-screen').classList.add('slide-hidden');
@@ -568,7 +577,6 @@
         });
         window.addEventListener("pagehide", window.triggerDestruct);
         
-        // THE BFCache FIX: Safari "Back Button" Hard Reload
         window.addEventListener("pageshow", function(e) {
             if (e.persisted) {
                 window.location.reload();
