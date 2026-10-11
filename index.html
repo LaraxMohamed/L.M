@@ -9,7 +9,15 @@
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #050508; color: #ffffff; height: 100vh; width: 100vw; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; }
+        
+        /* FIXED: Locked the body to the viewport to kill the iOS keyboard push bug */
+        body { 
+            background-color: #050508; color: #ffffff; 
+            width: 100vw; height: 100dvh; /* dynamic viewport height */
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden; overscroll-behavior: none;
+            display: flex; justify-content: center; align-items: center; 
+        }
 
         /* Mood Aura Background */
         .ambient-bg {
@@ -327,17 +335,14 @@
         
         fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchend', stopScan); fpBtn.addEventListener('touchcancel', stopScan);
 
-        // --- PASSWORD GATE & SCROLL FIX ---
+        // --- PASSWORD GATE ---
         document.getElementById('pass-input').addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
         function checkPassword() {
             const val = document.getElementById('pass-input').value.trim();
             if (val === "16/9/2026" || val === "16/09/2026") {
                 
-                // Force the iPhone keyboard to close and snap scroll layout to the absolute top
                 document.getElementById('pass-input').blur();
-                window.scrollTo(0, 0);
-                document.querySelector('.mobile-container').scrollTop = 0;
-
+                
                 document.getElementById('password-screen').classList.add('hidden');
                 startCounter();
                 
@@ -351,10 +356,6 @@
                     document.getElementById('password-screen').style.display = 'none'; 
                     document.getElementById('dashboard-screen').classList.remove('slide-hidden'); 
                     document.getElementById('dashboard-screen').style.pointerEvents = 'auto'; 
-                    
-                    // Double-check the scroll lock after transition
-                    window.scrollTo(0, 0);
-                    document.querySelector('.mobile-container').scrollTop = 0;
                 }, 600);
             } else {
                 const passIn = document.getElementById('pass-input'); passIn.style.borderColor = "#ff4757"; passIn.style.transform = "translateX(-10px)";
@@ -390,17 +391,17 @@
             }
         }
 
-        // --- UPGRADED TRIPLE-THREAT SELF-DESTRUCT ---
+        // --- SILENT INTERNAL SELF-DESTRUCT ---
         function triggerDestruct() {
-            window.location.replace("https://www.google.com");
+            // Instantly blank out the screen and reload to lock it without triggering an Apple warning
+            document.body.style.display = 'none';
+            window.location.reload();
         }
         
-        // Triggers when minimizing or switching apps
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === 'hidden') triggerDestruct();
         });
         
-        // Aggressive fallback to catch Apple's background freezing
         window.addEventListener("pagehide", triggerDestruct);
     </script>
 </body>
