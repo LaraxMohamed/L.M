@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <!-- Dynamic Safari Status Bar Color -->
-    <meta name="theme-color" id="theme-color-meta" content="#3a1325">
+    <meta name="theme-color" id="theme-color-meta" content="#1a050f">
     
     <title>16.09</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -14,44 +14,50 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* Removed Safe-Area padding from body so the background covers the entire screen */
+        /* THE NOTCH FIX: The background color is now controlled by JS to match the aura exactly */
         body { 
-            background-color: #050508; color: #ffffff; 
+            background-color: #1a050f; /* Base Dark Pink */
+            color: #ffffff; 
             width: 100vw; height: 100dvh;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             overflow: hidden; overscroll-behavior: none;
             display: flex; justify-content: center; align-items: center; 
+            transition: background-color 1.5s ease;
         }
 
-        /* High-End Cross-Fading Auras */
+        /* High-End Cross-Fading Auras with Distinct Colors */
         .ambient-layer {
             position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
             opacity: 0; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
             z-index: 1; filter: blur(40px);
             animation: slow-drift 15s infinite alternate ease-in-out;
+            will-change: opacity;
         }
         .ambient-layer.active { opacity: 1; }
         
+        /* Bright, Soft Pastel Pink for Love */
         #aura-love {
-            background: radial-gradient(circle at 10% 20%, rgba(255, 154, 158, 0.35), transparent 45%),
-                        radial-gradient(circle at 90% 80%, rgba(254, 207, 239, 0.35), transparent 45%),
-                        radial-gradient(circle at 50% 50%, rgba(255, 182, 193, 0.25), transparent 50%);
+            background: radial-gradient(circle at 10% 20%, rgba(255, 154, 158, 0.4), transparent 60%),
+                        radial-gradient(circle at 90% 80%, rgba(254, 207, 239, 0.4), transparent 60%),
+                        radial-gradient(circle at 50% 50%, rgba(255, 182, 193, 0.3), transparent 60%);
         }
+        /* Calming Violet for Miss You */
         #aura-miss {
-            background: radial-gradient(circle at 10% 20%, rgba(90, 50, 220, 0.35), transparent 45%),
-                        radial-gradient(circle at 90% 80%, rgba(120, 80, 255, 0.3), transparent 45%),
-                        radial-gradient(circle at 50% 50%, rgba(50, 20, 150, 0.25), transparent 50%);
+            background: radial-gradient(circle at 10% 20%, rgba(90, 50, 220, 0.4), transparent 60%),
+                        radial-gradient(circle at 90% 80%, rgba(120, 80, 255, 0.4), transparent 60%),
+                        radial-gradient(circle at 50% 50%, rgba(50, 20, 150, 0.3), transparent 60%);
         }
+        /* Deep, Dark Blood-Red for Urgent/Angry */
         #aura-urgent {
-            background: radial-gradient(circle at 10% 20%, rgba(200, 0, 0, 0.5), transparent 45%),
-                        radial-gradient(circle at 90% 80%, rgba(130, 0, 0, 0.55), transparent 45%),
-                        radial-gradient(circle at 50% 50%, rgba(60, 0, 0, 0.6), transparent 50%);
+            background: radial-gradient(circle at 10% 20%, rgba(220, 0, 0, 0.5), transparent 60%),
+                        radial-gradient(circle at 90% 80%, rgba(150, 0, 0, 0.55), transparent 60%),
+                        radial-gradient(circle at 50% 50%, rgba(90, 0, 0, 0.4), transparent 60%);
         }
         @keyframes slow-drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-2%, -2%) scale(1.05); } }
 
         /* Continuous Background Particles */
         #ambient-fx { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: hidden; }
-        .bg-particle { position: absolute; bottom: -50px; pointer-events: none; animation: floatToTop linear forwards; }
+        .bg-particle { position: absolute; bottom: -50px; pointer-events: none; animation: floatToTop linear forwards; will-change: transform, opacity; }
         @keyframes floatToTop { to { transform: translateY(-120vh) rotate(45deg); opacity: 0; } }
 
         .mobile-container { width: 100%; max-width: 420px; height: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; -ms-overflow-style: none; scrollbar-width: none; }
@@ -117,19 +123,19 @@
         .terminal-box { background: transparent; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 10px 5px; -ms-overflow-style: none; scrollbar-width: none; z-index: 10; }
         .terminal-box::-webkit-scrollbar { display: none; }
         
-        .msg { display: flex; flex-direction: column; width: 100%; transform-origin: bottom center; }
-        
-        /* THE FIX: Only animate the ABSOLUTE NEWEST message to kill the jitter/vibration */
-        .msg:last-child { 
-            animation: floatIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
+        /* GPU Accelerated Smooth Chat Physics */
+        .msg { 
+            display: flex; flex-direction: column; width: 100%; 
+            animation: floatIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
             opacity: 0; transform: translateY(15px) translateZ(0); 
+            transform-origin: bottom center; 
             will-change: transform, opacity; 
         }
         @keyframes floatIn { to { opacity: 1; transform: translateY(0) translateZ(0); } }
         
         .msg.incoming { align-items: flex-start; }
         .msg.outgoing { align-items: flex-end; }
-        .msg-bubble { padding: 14px 20px; border-radius: 22px; font-size: 0.95rem; max-width: 82%; line-height: 1.45; box-shadow: 0 5px 20px rgba(0,0,0,0.2); letter-spacing: 0.2px; }
+        .msg-bubble { padding: 14px 20px; border-radius: 22px; font-size: 0.95rem; max-width: 82%; line-height: 1.45; box-shadow: 0 5px 20px rgba(0,0,0,0.2); letter-spacing: 0.2px; transform: translateZ(0); will-change: transform; }
         .msg.incoming .msg-bubble { background: rgba(255, 255, 255, 0.12); border-bottom-left-radius: 6px; color: #fff; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
         .msg.outgoing .msg-bubble { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border-bottom-right-radius: 6px; color: #111; font-weight: 500; }
         
@@ -225,7 +231,7 @@
         </div>
     </div>
 
-    <!-- Firebase DB Logic -->
+    <!-- Firebase DB Logic - ZERO JITTER RENDER SYSTEM -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
@@ -253,14 +259,16 @@
         }
 
         const chatHistory = document.getElementById('chat-history');
+        
         onValue(ref(db, 'messages'), (snapshot) => {
-            chatHistory.innerHTML = ''; 
+            // WE NO LONGER WIPE THE HTML. This completely cures the vibration bug.
             currentMessages = [];
             
             if(snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
                     const msg = childSnapshot.val();
-                    currentMessages.push({ key: childSnapshot.key, ...msg });
+                    const msgKey = childSnapshot.key;
+                    currentMessages.push({ key: msgKey, ...msg });
                     
                     const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     const cssClass = msg.sender === 'Lara' ? 'outgoing' : 'incoming';
@@ -269,18 +277,29 @@
                     let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
                     const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time}` : `${statusText} • ${time}`;
                     
-                    chatHistory.insertAdjacentHTML('beforeend', `
-                        <div class="msg ${cssClass}">
-                            <div class="msg-bubble">${msg.text}</div>
-                            <div class="msg-status">${statusHtml}</div>
-                        </div>
-                    `);
+                    const existingMsg = document.getElementById('msg-' + msgKey);
+                    
+                    if (existingMsg) {
+                        // If message is already on screen, just update the status dot (No animation glitch!)
+                        const statusDiv = existingMsg.querySelector('.msg-status');
+                        if (statusDiv.innerHTML !== statusHtml) {
+                            statusDiv.innerHTML = statusHtml;
+                        }
+                    } else {
+                        // If it's a completely new message, inject it at the bottom so it animates beautifully
+                        chatHistory.insertAdjacentHTML('beforeend', `
+                            <div class="msg ${cssClass}" id="msg-${msgKey}">
+                                <div class="msg-bubble">${msg.text}</div>
+                                <div class="msg-status">${statusHtml}</div>
+                            </div>
+                        `);
+                        
+                        // Snap scroll to bottom only when a brand new message arrives
+                        setTimeout(() => { 
+                            chatHistory.scrollTop = chatHistory.scrollHeight; 
+                        }, 10);
+                    }
                 });
-                
-                // THE FIX: Instant native snap to bottom instead of smooth JS scroll fighting CSS
-                setTimeout(() => { 
-                    chatHistory.scrollTop = chatHistory.scrollHeight; 
-                }, 10);
             }
             if (window.isChatOpen) window.markUnreadAsSeen();
         });
@@ -305,18 +324,21 @@
             layerMiss.classList.remove('active');
             layerUrgent.classList.remove('active');
             
-            // Activate Layer & Update Safari Address Bar perfectly
+            // Activate Layer & Update BOTH the body background and Safari Address Bar perfectly
             if (latestState === 'urgent') {
                 layerUrgent.classList.add('active');
-                themeMeta.content = '#300000'; // Dark Red
+                document.body.style.backgroundColor = '#1a0000'; // Deep Dark Red Fix
+                themeMeta.content = '#1a0000'; 
             }
             else if (latestState === 'miss') {
                 layerMiss.classList.add('active');
-                themeMeta.content = '#160a2b'; // Dark Purple
+                document.body.style.backgroundColor = '#0d051a'; // Deep Dark Purple Fix
+                themeMeta.content = '#0d051a'; 
             }
             else {
                 layerLove.classList.add('active');
-                themeMeta.content = '#3a1325'; // Dark Pink
+                document.body.style.backgroundColor = '#1a050f'; // Deep Dark Pink Fix
+                themeMeta.content = '#1a050f'; 
             }
         });
     </script>
