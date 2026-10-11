@@ -164,7 +164,6 @@
         </button>
 
         <div id="scanner-screen" class="screen">
-            <!-- 1 Tap arms the scanner -->
             <p class="auth-text" id="status-text">Awaiting Identity</p>
             <button class="fingerprint-btn" id="fingerprint"><i class="fa-solid fa-fingerprint"></i><div class="pulse-ring" id="ring1"></div></button>
         </div>
@@ -275,10 +274,14 @@
                         setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 10);
                     }
                 });
+            } else {
+                // THE FIX: Instantly wipe the chat HTML if admin deletes everything
+                chatHistory.innerHTML = '';
+                autoStreakValue = 0;
             }
             if (window.isChatOpen) window.markUnreadAsSeen();
 
-            // Automatic Math Streak - Auto Drops to 0 if a day is missed
+            // Automatic Math Streak
             const validMsgs = currentMessages.filter(m => m.timestamp);
             if (validMsgs.length === 0) {
                 autoStreakValue = 0;
@@ -290,7 +293,6 @@
                 const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
                 
                 let streak = 0;
-                // If the array of dates contains today OR yesterday, the streak is alive.
                 if (uniqueDates[0] === getStr(today) || uniqueDates[0] === getStr(yesterday)) {
                     streak = 1;
                     let currDate = new Date(uniqueDates[0] + 'T12:00:00'); 
@@ -305,7 +307,6 @@
             updateStreakUI();
         });
 
-        // Admin Override Listener for Streak
         let isManualStreak = false;
         let manualStreakValue = 0;
 
@@ -324,10 +325,9 @@
             else document.getElementById('streak-count').innerText = autoStreakValue.toString();
         }
 
-        // Admin Remote Lock Listener
         onValue(ref(db, 'settings/remoteLock'), (snapshot) => {
             if (snapshot.exists() && snapshot.val() === true) {
-                if (typeof triggerDestruct === "function") triggerDestruct();
+                if (typeof window.triggerDestruct === "function") window.triggerDestruct();
             }
         });
 
@@ -540,15 +540,39 @@
             setTimeout(() => p.remove(), 12000); 
         }, 800); 
 
-        // Made globally accessible for Admin panel
+        // THE FIX: Smart UI reset instead of screen blanking
         window.triggerDestruct = function() {
-            document.body.style.display = 'none';
-            window.location.reload();
+            document.getElementById('dashboard-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').classList.add('slide-hidden');
+            document.getElementById('communication-screen').style.display = 'none';
+            document.getElementById('communication-screen').classList.add('slide-hidden');
+            
+            const scanner = document.getElementById('scanner-screen');
+            scanner.style.display = 'flex';
+            scanner.classList.remove('hidden');
+            
+            isScanned = false;
+            isArmed = false;
+            
+            sText.innerText = "Awaiting Identity";
+            sText.style.color = "#dcdcdc";
+            sText.style.textShadow = "none";
+            
+            fpBtn.classList.remove('scanning');
+            ring.style.animation = "none";
+            
+            if (isMusicPlaying) toggleMusic();
         }
+        
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === 'hidden') window.triggerDestruct();
         });
         window.addEventListener("pagehide", window.triggerDestruct);
+        
+        // THE FIX: Catches Safari loading the page from the "Back" button cache
+        window.addEventListener("pageshow", function(e) {
+            if (e.persisted) window.triggerDestruct();
+        });
     </script>
 </body>
 </html>
