@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <meta name="theme-color" id="theme-color-meta" content="#1a050f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <title>16.09</title>
-    <!-- Elegant Handwriting Font -->
+    <!-- Elegant Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -62,8 +64,9 @@
         .time-value { font-size: 1.6rem; font-weight: 600; color: #ffffff; }
         .time-label { font-size: 0.6rem; color: #777; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 5px; }
 
+        /* GRID LAYOUT FIX */
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; }
-        .tile { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 35px 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s; text-decoration: none; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .tile { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 35px 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s; text-decoration: none; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; text-align: center; }
         .tile:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.1); }
         .tile-icon { font-size: 2.2rem; color: #ffffff; }
         .tile-full { grid-column: span 2; flex-direction: row; gap: 15px; padding: 22px; background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(255,255,255,0.12); }
@@ -73,47 +76,27 @@
         @keyframes subtlePulse { from { box-shadow: 0 0 10px rgba(255, 154, 158, 0.1); } to { box-shadow: 0 0 30px rgba(255, 154, 158, 0.3); } }
         
         .tile-vault .tile-icon { color: #f6e58d; filter: drop-shadow(0 0 10px rgba(246, 229, 141, 0.3)); }
+        
+        /* Morning Letter as a sleek Half-Tile */
+        .tile-note { display: none; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 0 25px rgba(255, 255, 255, 0.2); animation: subtlePulse 3s infinite alternate; }
+        .tile-note.read { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); box-shadow: none; animation: none; }
+        .tile-note .tile-icon { margin-bottom: 15px; }
+        .tile-note .tile-title { font-size: 1rem; }
+
+        .tile-signal { background: linear-gradient(135deg, rgba(255,159,243,0.15), rgba(255,159,243,0.05)); border-color: rgba(255,159,243,0.3); }
         .tile-signal .tile-icon { color: #ff9ff3; filter: drop-shadow(0 0 10px rgba(255, 159, 243, 0.3)); animation: floatIcon 3s infinite ease-in-out; }
         @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
-        /* --- CINEMATIC INTRO OVERLAY --- */
-        .recap-intro-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: #000000; z-index: 500; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s ease; pointer-events: none; }
-        .intro-text { position: absolute; color: #fff; font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 3px; opacity: 0; transform: scale(0.95); transition: all 1.5s ease; text-align: center;}
-        .intro-text.show { opacity: 1; transform: scale(1); }
-        .intro-text.title { font-family: 'Caveat', cursive; font-size: 3.5rem; color: #ff9a9e; font-weight: 600; letter-spacing: 2px; text-shadow: 0 0 20px rgba(255, 154, 158, 0.4); }
-        .intro-text.subtitle { font-family: 'Caveat', cursive; font-size: 1.8rem; color: #fecfef; margin-top: 70px; }
+        .unread-badge { position: absolute; top: 12px; right: 20px; background: #ff4757; color: #fff; font-size: 0.8rem; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(255,71,87,0.6); animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 20; }
+        .unread-badge.hidden { display: none; }
+        @keyframes bounceIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
         /* Navigation Header */
         .nav-header { width: 100%; display: flex; align-items: center; padding-top: 10px; margin-bottom: 20px; z-index: 10; flex-shrink: 0; }
         .back-btn { font-size: 1.3rem; color: #ccc; cursor: pointer; padding: 10px 15px 10px 0; transition: color 0.3s; }
         .term-header { font-weight: 600; font-size: 1.2rem; margin-left: 5px; letter-spacing: 0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
 
-        /* --- RECAP SCREEN SPECIFICS --- */
-        #recap-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; }
-        
-        .cinematic-letter { width: 100%; background: linear-gradient(180deg, rgba(30, 10, 20, 0.6), rgba(10, 5, 10, 0.8)); border: 1px solid rgba(255, 154, 158, 0.2); border-radius: 28px; padding: 35px 25px; backdrop-filter: blur(30px); margin-bottom: 35px; flex-shrink: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
-        .cinematic-letter::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff9a9e, #fecfef); }
-        
-        .letter-p { font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.7; color: #f0f0f0; margin-bottom: 18px; font-weight: 300; letter-spacing: 0.3px; opacity: 0; transform: translateY(20px); transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .letter-p.visible { opacity: 1; transform: translateY(0); }
-        
-        .signature { font-family: 'Caveat', cursive; font-size: 2.4rem; color: #ff9a9e; text-align: right; margin-top: 15px; opacity: 0; transform: translateY(20px); transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); text-shadow: 0 2px 10px rgba(255,154,158,0.4); }
-        .signature.visible { opacity: 1; transform: translateY(0); }
-
-        .photo-gallery-title { width: 100%; font-family: 'Caveat', cursive; font-size: 2rem; color: #fecfef; margin-bottom: 15px; padding-left: 5px; flex-shrink: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        
-        .polaroid-scroll { width: 100%; display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 10px 40px 10px; -ms-overflow-style: none; scrollbar-width: none; flex-shrink: 0; }
-        .polaroid-scroll::-webkit-scrollbar { display: none; }
-        
-        .polaroid { flex: 0 0 240px; background: #fff; padding: 12px 12px 50px 12px; border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); scroll-snap-align: center; cursor: pointer; position: relative; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .polaroid img, .polaroid video { width: 100%; height: 280px; object-fit: cover; border-radius: 3px; border: 1px solid #eee; background: #000; }
-        .polaroid-caption { position: absolute; bottom: 15px; left: 0; width: 100%; text-align: center; color: #222; font-family: 'Caveat', cursive; font-size: 1.4rem; font-weight: 600; letter-spacing: 0.5px; }
-        
-        .polaroid:nth-child(even) { transform: rotate(3deg) translateY(5px); }
-        .polaroid:nth-child(odd) { transform: rotate(-2deg) translateY(-5px); }
-        .polaroid:active { transform: scale(0.95); }
-
-        /* Full Screen Lightbox (Supports Video & Image) */
+        /* --- LIGHTBOX & INTRO --- */
         #lightbox { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(5, 5, 8, 0.95); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(15px); }
         #lightbox.active { opacity: 1; pointer-events: auto; }
         #lightbox-content { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
@@ -121,33 +104,80 @@
         #lightbox.active #lightbox-content img, #lightbox.active #lightbox-content video { transform: scale(1); }
         .close-lightbox { position: absolute; top: calc(20px + env(safe-area-inset-top)); right: 25px; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 1001; }
 
-        /* Premium Chat Screen */
+        .recap-intro-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: #000000; z-index: 500; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s ease; pointer-events: none; }
+        .intro-text { position: absolute; color: #fff; font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 3px; opacity: 0; transform: scale(0.95); transition: all 1.5s ease; text-align: center;}
+        .intro-text.show { opacity: 1; transform: scale(1); }
+        .intro-text.title { font-family: 'Caveat', cursive; font-size: 3.5rem; color: #ff9a9e; font-weight: 600; letter-spacing: 2px; text-shadow: 0 0 20px rgba(255, 154, 158, 0.4); }
+        .intro-text.subtitle { font-family: 'Caveat', cursive; font-size: 1.8rem; color: #fecfef; margin-top: 70px; }
+
+        /* --- SCREENS --- */
+        #recap-screen, #note-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; }
+        
+        .cinematic-letter { width: 100%; background: linear-gradient(180deg, rgba(30, 10, 20, 0.6), rgba(10, 5, 10, 0.8)); border: 1px solid rgba(255, 154, 158, 0.2); border-radius: 28px; padding: 35px 25px; backdrop-filter: blur(30px); margin-bottom: 35px; flex-shrink: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+        .cinematic-letter::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff9a9e, #fecfef); }
+        .letter-p { font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.7; color: #f0f0f0; margin-bottom: 18px; font-weight: 300; letter-spacing: 0.3px; opacity: 0; transform: translateY(20px); transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .letter-p.visible { opacity: 1; transform: translateY(0); }
+        .signature { font-family: 'Caveat', cursive; font-size: 2.4rem; color: #ff9a9e; text-align: right; margin-top: 15px; opacity: 0; transform: translateY(20px); transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); text-shadow: 0 2px 10px rgba(255,154,158,0.4); }
+        .signature.visible { opacity: 1; transform: translateY(0); }
+
+        /* Note Screen Specifics */
+        #note-screen .cinematic-letter { background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)); border-color: rgba(255, 255, 255, 0.2); }
+        .daily-text { font-family: 'Caveat', cursive; font-size: 1.8rem; line-height: 1.5; color: #fff; white-space: pre-wrap; letter-spacing: 1px; }
+
+        .photo-gallery-title { width: 100%; font-family: 'Caveat', cursive; font-size: 2rem; color: #fecfef; margin-bottom: 15px; padding-left: 5px; flex-shrink: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .polaroid-scroll { width: 100%; display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 10px 40px 10px; -ms-overflow-style: none; scrollbar-width: none; flex-shrink: 0; }
+        .polaroid-scroll::-webkit-scrollbar { display: none; }
+        .polaroid { flex: 0 0 240px; background: #fff; padding: 12px 12px 50px 12px; border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); scroll-snap-align: center; cursor: pointer; position: relative; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .polaroid img, .polaroid video { width: 100%; height: 280px; object-fit: cover; border-radius: 3px; border: 1px solid #eee; background: #000; }
+        .polaroid-caption { position: absolute; bottom: 15px; left: 0; width: 100%; text-align: center; color: #222; font-family: 'Caveat', cursive; font-size: 1.4rem; font-weight: 600; letter-spacing: 0.5px; }
+        .polaroid:nth-child(even) { transform: rotate(3deg) translateY(5px); }
+        .polaroid:nth-child(odd) { transform: rotate(-2deg) translateY(-5px); }
+        .polaroid:active { transform: scale(0.95); }
+
+        /* --- CHAT SCREEN --- */
         .terminal-box { background: transparent; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 10px 5px; -ms-overflow-style: none; scrollbar-width: none; z-index: 10; }
         .terminal-box::-webkit-scrollbar { display: none; }
-        .msg { display: flex; flex-direction: column; width: 100%; animation: floatIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(15px) translateZ(0); transform-origin: bottom center; will-change: transform, opacity; }
+        .msg { display: flex; flex-direction: column; width: 100%; animation: floatIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(15px) translateZ(0); transform-origin: bottom center; will-change: transform, opacity; position: relative; }
         @keyframes floatIn { to { opacity: 1; transform: translateY(0) translateZ(0); } }
         .msg.incoming { align-items: flex-start; }
         .msg.outgoing { align-items: flex-end; }
-        .msg-bubble { padding: 14px 20px; border-radius: 22px; font-size: 0.95rem; max-width: 82%; line-height: 1.45; box-shadow: 0 5px 20px rgba(0,0,0,0.2); letter-spacing: 0.2px; transform: translateZ(0); will-change: transform; }
+        
+        .msg-bubble { padding: 14px 20px; border-radius: 22px; font-size: 0.95rem; max-width: 82%; line-height: 1.45; box-shadow: 0 5px 20px rgba(0,0,0,0.2); letter-spacing: 0.2px; transform: translateZ(0); will-change: transform; position: relative; user-select: none; }
         .msg.incoming .msg-bubble { background: rgba(255, 255, 255, 0.12); border-bottom-left-radius: 6px; color: #fff; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
         .msg.outgoing .msg-bubble { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border-bottom-right-radius: 6px; color: #111; font-weight: 500; }
+        
+        .reaction-badge { position: absolute; bottom: -8px; right: -5px; background: rgba(30, 30, 40, 0.9); border: 1px solid #444; border-radius: 50%; padding: 4px; font-size: 0.85rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 5; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
         .msg-status { font-size: 0.65rem; color: #bbb; margin-top: 6px; display: flex; align-items: center; gap: 5px; font-weight: 500; letter-spacing: 0.3px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
         .status-dot { width: 7px; height: 7px; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+
+        .typing-bubble { display: flex; gap: 4px; padding: 14px 20px; align-items: center; justify-content: center; height: 45px; }
+        .typing-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
         .chat-footer { width: 100%; display: flex; flex-direction: column; gap: 12px; background: rgba(15, 15, 20, 0.75); backdrop-filter: blur(25px); padding: 15px; border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 -10px 40px rgba(0,0,0,0.4); margin-bottom: 10px; z-index: 10; flex-shrink: 0;}
         .quick-actions-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
         .quick-actions-row::-webkit-scrollbar { display: none; }
         .chip-btn { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; padding: 10px 18px; font-size: 0.85rem; color: #f0f0f0; white-space: nowrap; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; gap: 8px; font-weight: 500; }
         .chip-btn:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.15); }
-        .chip-urgent { border-color: rgba(255, 71, 87, 0.4); color: #ff6b81; background: rgba(255, 71, 87, 0.05); }
         .input-row { display: flex; align-items: center; gap: 12px; width: 100%; }
         .chat-input { flex-grow: 1; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.12); color: white; padding: 14px 18px; border-radius: 22px; font-size: 0.95rem; outline: none; transition: border 0.3s, box-shadow 0.3s; }
         .chat-input:focus { border-color: #ff9a9e; box-shadow: 0 0 15px rgba(255, 154, 158, 0.15); }
         .send-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none; color: #111; font-size: 1.15rem; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 5px 15px rgba(255, 154, 158, 0.3); transition: transform 0.2s; }
         .send-btn:active { transform: scale(0.85); }
-        
-        .tap-particle { position: absolute; pointer-events: none; animation: burstUp 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 100; text-shadow: 0 5px 15px rgba(0,0,0,0.3); will-change: transform, opacity; }
-        @keyframes burstUp { 0% { opacity: 1; transform: translateY(0) scale(0.5) rotate(0deg) translateZ(0); } 100% { opacity: 0; transform: translateY(-120px) scale(1.5) rotate(25deg) translateZ(0); } }
+
+        /* --- IOS ACTION SHEET (EDIT/DELETE) --- */
+        .action-sheet-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: flex-end; justify-content: center; padding-bottom: env(safe-area-inset-bottom); }
+        .action-sheet-overlay.active { opacity: 1; pointer-events: auto; }
+        .action-sheet { width: 100%; max-width: 420px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 25px 20px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); border-top: 1px solid rgba(255,255,255,0.1); }
+        .action-sheet-overlay.active .action-sheet { transform: translateY(0); }
+        .sheet-btn { width: 100%; padding: 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; color: #fff; font-size: 1.05rem; margin-bottom: 12px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .sheet-btn:active { background: rgba(255,255,255,0.15); }
+        .sheet-btn.danger { color: #ff4757; background: rgba(255, 71, 87, 0.1); border-color: rgba(255, 71, 87, 0.2); }
+        .sheet-btn.danger:active { background: rgba(255, 71, 87, 0.2); }
     </style>
 </head>
 <body>
@@ -156,13 +186,21 @@
         <source src="wayah.m4a" type="audio/mp4">
     </audio>
 
-    <!-- The Universal Media Lightbox -->
     <div id="lightbox" onclick="closeLightbox()">
         <i class="fa-solid fa-xmark close-lightbox"></i>
         <div id="lightbox-content"></div>
     </div>
 
-    <!-- THE CINEMATIC INTRO OVERLAY -->
+    <!-- Edit/Delete Action Sheet -->
+    <div id="action-sheet-overlay" class="action-sheet-overlay" onclick="closeActionSheet()">
+        <div class="action-sheet" onclick="event.stopPropagation()">
+            <div style="text-align:center; color:#888; margin-bottom:20px; font-size:0.85rem; letter-spacing:0.5px;" id="sheet-preview">Message Options</div>
+            <button class="sheet-btn" onclick="editSelectedMessage()"><i class="fa-solid fa-pen" style="margin-right:8px;"></i> Edit Message</button>
+            <button class="sheet-btn danger" onclick="deleteSelectedMessage()"><i class="fa-solid fa-trash-can" style="margin-right:8px;"></i> Delete for Everyone</button>
+            <button class="sheet-btn" onclick="closeActionSheet()" style="background: transparent; border: 1px solid #444; margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
     <div id="recap-intro" class="recap-intro-overlay" style="display: none;">
         <div class="intro-text" id="intro-text-1">Decrypting Memories...</div>
         <div class="intro-text title" id="intro-text-2">Chapter 01</div>
@@ -203,22 +241,34 @@
             </div>
 
             <div class="grid-container">
+                <!-- THE PROMISE & MONTH ONE RECAP (Full Width, Most Important) -->
+                <a href="promise.html" class="tile tile-full">
+                    <i class="fa-solid fa-envelope-open-text tile-icon" style="font-size: 1.8rem; margin-bottom: 5px;"></i>
+                    <div class="tile-title">The Promise</div>
+                </a>
+
                 <div class="tile tile-full tile-recap" onclick="openRecap()">
                     <i class="fa-solid fa-calendar-heart tile-icon" style="font-size: 1.8rem; margin-bottom: 5px; color: #ff9a9e;"></i>
                     <div class="tile-title" style="color: #ff9a9e;">Month One Recap</div>
                 </div>
 
-                <a href="promise.html" class="tile tile-full">
-                    <i class="fa-solid fa-envelope-open-text tile-icon" style="font-size: 1.8rem; margin-bottom: 5px;"></i>
-                    <div class="tile-title">The Promise</div>
-                </a>
+                <!-- MORNING LETTER & VAULT (Half Width, Below the main features) -->
+                <div class="tile tile-note" id="morning-note-tile" onclick="openNote()">
+                    <i id="note-icon" class="fa-solid fa-envelope tile-icon"></i>
+                    <div class="tile-title" id="note-title">Morning Letter</div>
+                </div>
                 
                 <div class="tile tile-vault" onclick="window.open('https://drive.google.com/drive/folders/1_YeKPVTD_UdM8eOKV3e_R_SaPUmmz2c3?usp=sharing', '_blank')"><i class="fa-solid fa-lock tile-icon"></i></div>
-                <div class="tile tile-signal" onclick="openCommMenu()"><i class="fa-solid fa-paper-plane tile-icon"></i></div>
+                
+                <!-- THE CHAT -->
+                <div class="tile tile-full tile-signal" onclick="openCommMenu()">
+                    <div id="unread-badge" class="unread-badge hidden">0</div>
+                    <i class="fa-solid fa-paper-plane tile-icon" style="font-size: 1.8rem; margin-bottom: 5px;"></i>
+                    <div class="tile-title">Our Chat</div>
+                </div>
             </div>
         </div>
 
-        <!-- THE CINEMATIC RECAP SCREEN -->
         <div id="recap-screen" class="screen slide-hidden">
             <div class="nav-header">
                 <i class="fa-solid fa-chevron-down back-btn" onclick="closeRecap()"></i>
@@ -226,7 +276,6 @@
             </div>
 
             <div class="cinematic-letter">
-                <!-- THE PERFECTED LETTER -->
                 <div class="letter-p">Happy 1 month lena yhabebteee, rbna ykhleke leya ylara w3o'bal el3omr kolo wehna maa baad kda yhabebte!! ana bahebek awe awee ba wmbsot en awl shahr 3ada w ehna mbsoten feh maa baad winsha'allah daymn mbsoten kda, ana frhan awe bgd akheran ana wlara habebte maa baad!</div>
                 <div class="letter-p">la maake bgd yhabebte khlas w 3ada shahr kman ana bgd lesa msh msd' lhd dlw'te, ana lhd mn youmen bzbt mkontsh msd' ele ana feh bgd, msh 3adam seka fhabebte aw haga, bs bgd mn kotr elfarha ylara! ana 3omre 3omree ma kont atkhyl enna hnb'a maa baad bgd, wlhwar kan bnzbale baaed awe, kan nfse gdnn, bs kont hass fe hagat kter flnos mkhlya elhwar saab, bs elhamdolelahh b'et maa habebte khlas wbgd b'et aktr wahd mbsot fldnya de.</div>
                 <div class="letter-p">Lara ana wna gmbk bb'a mbsot bshakl ente msh motkhylah yhabebte wallahe, bhs ene faaln lara bthbne awe w mohtma beya wbtday' aala zaaly, wlara habebte b't btbyn enha bthbne kmannn!! w de aande bldnya kolha wallahe, ebtsamtk bs wehna maa baad yhabebte btkhlene frhann awe, frhan ene maaya ahla wahda fldnya wbgd msh aayz gherha, wfrhan enk kman mabsota wente maaya yhabebte, insha'allah mbsoten maa baad dymn yhabebte wfeya ay haga whsha wnfdl maa baad tol el3omr kda ylara aashan ana bamot fekke wmsh aayz ay hd gherk yhabebte, wmsh hla'y asln wahda gamela awe kda, wla a'dr aheb wahda elhob ele bahebo leke da, wla hla'y wahda bthbne ad ma lara habebte bthbne!!</div>
@@ -238,55 +287,43 @@
 
             <div class="photo-gallery-title">The Archives</div>
             <div class="polaroid-scroll">
-                
-                <!-- PHOTO 1: Where it started -->
                 <div class="polaroid" onclick="openLightbox(this)">
                     <img src="photo1.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';">
                     <div class="polaroid-caption">Where it started</div>
                 </div>
-                
-                <!-- THE VIDEO: Moving Polaroid -->
                 <div class="polaroid" onclick="openLightbox(this)">
                     <video src="video1.mp4" autoplay loop muted playsinline onerror="this.style.display='none';"></video>
                     <div class="polaroid-caption">My favorite smile</div>
                 </div>
-                
-                <!-- PHOTOS 2 through 8 (NO CAPTIONS UNDERNEATH) -->
-                <div class="polaroid" onclick="openLightbox(this)">
-                    <img src="photo2.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop';">
-                </div>
-
-                <div class="polaroid" onclick="openLightbox(this)">
-                    <img src="photo3.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1584284168016-56efd5598687?q=80&w=600&auto=format&fit=crop';">
-                </div>
-
-                <div class="polaroid" onclick="openLightbox(this)">
-                    <img src="photo4.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';">
-                </div>
-
-                <div class="polaroid" onclick="openLightbox(this)">
-                    <img src="photo5.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop';">
-                </div>
-
-                <div class="polaroid" onclick="openLightbox(this)">
-                    <img src="photo6.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop';">
-                </div>
-
-                <div class="polaroid" onclick="openLightbox(this)">
-                    <img src="photo7.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1584284168016-56efd5598687?q=80&w=600&auto=format&fit=crop';">
-                </div>
-
-                <div class="polaroid" onclick="openLightbox(this)">
-                    <img src="photo8.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';">
-                </div>
-
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo2.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop';"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo3.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1584284168016-56efd5598687?q=80&w=600&auto=format&fit=crop';"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo4.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo5.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop';"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo6.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop';"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo7.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1584284168016-56efd5598687?q=80&w=600&auto=format&fit=crop';"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo8.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';"></div>
             </div>
         </div>
 
-        <!-- CHAT SCREEN -->
+        <div id="note-screen" class="screen slide-hidden">
+            <div class="nav-header">
+                <i class="fa-solid fa-chevron-down back-btn" onclick="closeNote()"></i>
+                <div class="term-header">Morning Letter</div>
+            </div>
+            <div class="cinematic-letter">
+                <div class="daily-text" id="daily-note-content">Loading...</div>
+            </div>
+        </div>
+
         <div id="communication-screen" class="screen slide-hidden">
             <div class="nav-header"><i class="fa-solid fa-chevron-left back-btn" onclick="closeCommMenu()"></i><div class="term-header">Our Chat</div></div>
-            <div class="terminal-box" id="chat-history"></div>
+            <div class="terminal-box" id="chat-history">
+                <div class="msg incoming hidden" id="typing-indicator" style="order: 9999;">
+                    <div class="msg-bubble typing-bubble">
+                        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
             
             <div class="chat-footer">
                 <div class="quick-actions-row">
@@ -295,16 +332,18 @@
                     <div class="chip-btn chip-urgent" onclick="sendQuickNote(this, 'We need to talk.', 'urgent')"><i class="fa-solid fa-triangle-exclamation"></i> Urgent</div>
                 </div>
                 <div class="input-row">
-                    <input type="text" id="custom-msg" class="chat-input" placeholder="Type a message..." autocomplete="off">
+                    <!-- Updated Placeholder to show instructions -->
+                    <input type="text" id="custom-msg" class="chat-input" placeholder="Type a message... (Hold to edit/delete)" autocomplete="off">
                     <button class="send-btn" onclick="sendCustomNote(this)"><i class="fa-solid fa-arrow-up"></i></button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Firebase Code -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp, update, remove, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrjUFPcoAUuvUGTofcZOjOaT8__dLjdJU",
@@ -320,79 +359,229 @@
         const db = getDatabase(app);
         window.isChatOpen = false;
         window.currentMood = 'love';
-        let currentMessages = [];
+        window.currentMessages = []; // Made global for the edit function
         let streakAnchor = 0;
         let streakOffset = 0;
 
         window.sendToDatabase = function(messageText, type) {
             push(ref(db, 'messages'), { sender: 'Lara', text: messageText, status: 'Delivered', timestamp: serverTimestamp(), msgType: type });
             push(ref(db, 'aura'), { state: type });
+            set(ref(db, 'settings/typing/lara'), false);
         }
 
         const chatHistory = document.getElementById('chat-history');
+        const unreadBadge = document.getElementById('unread-badge');
         
         onValue(ref(db, 'messages'), (snapshot) => {
-            currentMessages = [];
+            window.currentMessages = [];
             let incomingKeys = new Set();
+            let unreadCount = 0;
             
             if(snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
                     const msg = childSnapshot.val();
                     const msgKey = childSnapshot.key;
                     incomingKeys.add(msgKey);
-                    currentMessages.push({ key: msgKey, ...msg });
+                    window.currentMessages.push({ key: msgKey, ...msg });
                     
+                    if (msg.sender === 'Mohamed' && msg.status !== 'Seen') unreadCount++;
+
                     const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     const cssClass = msg.sender === 'Lara' ? 'outgoing' : 'incoming';
                     
-                    let statusText = msg.sender === 'Lara' ? `${msg.status || 'Delivered'}` : `Mohamed`;
+                    // Show "Edited" if modified
+                    let deliveryStatus = msg.edited ? 'Edited' : (msg.status || 'Delivered');
+                    let statusText = msg.sender === 'Lara' ? deliveryStatus : `Mohamed`;
+                    
                     let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
                     const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time}` : `${statusText} • ${time}`;
                     
+                    let reactionHtml = msg.reaction ? `<div class="reaction-badge">${msg.reaction}</div>` : '';
+
                     const existingMsg = document.getElementById('msg-' + msgKey);
-                    
                     if (existingMsg) {
                         const statusDiv = existingMsg.querySelector('.msg-status');
                         if (statusDiv.innerHTML !== statusHtml) statusDiv.innerHTML = statusHtml;
+                        
+                        const bubbleDiv = existingMsg.querySelector('.msg-bubble');
+                        // Update text in case it was edited
+                        let currentTextHtml = msg.text + reactionHtml;
+                        if (bubbleDiv.innerHTML !== currentTextHtml) {
+                            bubbleDiv.innerHTML = currentTextHtml;
+                        }
                     } else {
-                        chatHistory.insertAdjacentHTML('beforeend', `
+                        // Added ontouchstart / onmousedown for the Long Press Action Sheet!
+                        const htmlStr = `
                             <div class="msg ${cssClass}" id="msg-${msgKey}">
-                                <div class="msg-bubble">${msg.text}</div>
+                                <div class="msg-bubble" 
+                                     ondblclick="toggleHeart('${msgKey}')"
+                                     ontouchstart="startPress('${msgKey}', '${msg.sender}')"
+                                     ontouchend="cancelPress()"
+                                     ontouchmove="cancelPress()"
+                                     onmousedown="startPress('${msgKey}', '${msg.sender}')"
+                                     onmouseup="cancelPress()"
+                                     onmouseleave="cancelPress()">
+                                     ${msg.text}${reactionHtml}
+                                </div>
                                 <div class="msg-status">${statusHtml}</div>
                             </div>
-                        `);
+                        `;
+                        chatHistory.insertAdjacentHTML('beforeend', htmlStr);
                         setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 10);
                     }
                 });
             }
             
             Array.from(chatHistory.children).forEach(child => {
-                if (!incomingKeys.has(child.id.replace('msg-', ''))) child.remove();
+                if (child.id && child.id !== 'typing-indicator' && !incomingKeys.has(child.id.replace('msg-', ''))) {
+                    child.remove();
+                }
             });
+
+            if (unreadCount > 0 && !window.isChatOpen) {
+                unreadBadge.innerText = unreadCount;
+                unreadBadge.classList.remove('hidden');
+            } else {
+                unreadBadge.classList.add('hidden');
+            }
 
             if (window.isChatOpen) window.markUnreadAsSeen();
             recalcStreak();
         });
 
+        // 1. HEART TOGGLE FUNCTION
+        window.toggleHeart = function(msgKey) {
+            const msgObj = window.currentMessages.find(m => m.key === msgKey);
+            if (msgObj) {
+                if (msgObj.reaction) {
+                    update(ref(db, 'messages/' + msgKey), { reaction: null }); // Remove heart
+                } else {
+                    update(ref(db, 'messages/' + msgKey), { reaction: '❤️' }); // Add heart
+                }
+                navigator.vibrate && navigator.vibrate(50);
+            }
+        }
+
+        // 2. LONG PRESS EDIT/DELETE LOGIC
+        let pressTimer;
+        window.selectedActionKey = null;
+
+        window.startPress = function(msgKey, sender) {
+            // Only allow Lara to edit/delete her OWN messages
+            if (sender !== 'Lara') return;
+            pressTimer = setTimeout(() => {
+                window.selectedActionKey = msgKey;
+                const msgObj = window.currentMessages.find(m => m.key === msgKey);
+                if (msgObj) {
+                    let preview = msgObj.text.length > 25 ? msgObj.text.substring(0, 25) + '...' : msgObj.text;
+                    document.getElementById('sheet-preview').innerText = `"${preview}"`;
+                    document.getElementById('action-sheet-overlay').classList.add('active');
+                    navigator.vibrate && navigator.vibrate(50); // Haptic feedback on menu open
+                }
+            }, 600); // 600ms hold to open menu
+        }
+
+        window.cancelPress = function() {
+            clearTimeout(pressTimer);
+        }
+
+        window.closeActionSheet = function() {
+            document.getElementById('action-sheet-overlay').classList.remove('active');
+            window.selectedActionKey = null;
+        }
+
+        window.deleteSelectedMessage = function() {
+            if(window.selectedActionKey) {
+                remove(ref(db, 'messages/' + window.selectedActionKey));
+                closeActionSheet();
+            }
+        }
+
+        window.editSelectedMessage = function() {
+            if(window.selectedActionKey) {
+                const msgObj = window.currentMessages.find(m => m.key === window.selectedActionKey);
+                const newText = prompt("Edit your message:", msgObj.text);
+                if (newText !== null && newText.trim() !== "") {
+                    update(ref(db, 'messages/' + window.selectedActionKey), { text: newText.trim(), edited: true });
+                }
+                closeActionSheet();
+            }
+        }
+
+        // Live Typing Detection
+        const typingIndicator = document.getElementById('typing-indicator');
+        onValue(ref(db, 'settings/typing/mohamed'), (snapshot) => {
+            if (snapshot.exists() && snapshot.val() === true) {
+                typingIndicator.classList.remove('hidden');
+                setTimeout(() => chatHistory.scrollTop = chatHistory.scrollHeight, 10);
+            } else {
+                typingIndicator.classList.add('hidden');
+            }
+        });
+
+        const chatInput = document.getElementById('custom-msg');
+        let typingTimeout;
+        chatInput.addEventListener('input', () => {
+            set(ref(db, 'settings/typing/lara'), true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => { set(ref(db, 'settings/typing/lara'), false); }, 2000);
+        });
+
+        const noteTile = document.getElementById('morning-note-tile');
+        const noteContent = document.getElementById('daily-note-content');
+        const noteIcon = document.getElementById('note-icon');
+        
+        onValue(ref(db, 'morningNote'), (snapshot) => {
+            if(snapshot.exists() && snapshot.val().text !== "") {
+                noteTile.style.display = 'flex';
+                noteContent.innerText = snapshot.val().text;
+                
+                if (snapshot.val().read) {
+                    noteTile.classList.add('read');
+                    noteIcon.className = "fa-solid fa-envelope-open-text tile-icon";
+                } else {
+                    noteTile.classList.remove('read');
+                    noteIcon.className = "fa-solid fa-envelope tile-icon";
+                }
+            } else {
+                noteTile.style.display = 'none';
+            }
+        });
+
+        window.openNote = function() {
+            const dScreen = document.getElementById('dashboard-screen');
+            const nScreen = document.getElementById('note-screen');
+            dScreen.classList.add('slide-hidden'); 
+            update(ref(db, 'morningNote'), { read: true });
+            setTimeout(() => { 
+                dScreen.style.display = 'none'; nScreen.style.display = 'flex'; 
+                setTimeout(() => { nScreen.classList.remove('slide-hidden'); }, 50); 
+            }, 400); 
+        }
+
+        window.closeNote = function() {
+            const dScreen = document.getElementById('dashboard-screen');
+            const nScreen = document.getElementById('note-screen');
+            nScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { 
+                nScreen.style.display = 'none'; dScreen.style.display = 'flex'; 
+                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
+            }, 400); 
+        }
+
         onValue(ref(db, 'settings/streakState'), (snapshot) => {
             if(snapshot.exists()) {
-                streakAnchor = snapshot.val().anchor || 0;
-                streakOffset = snapshot.val().offset || 0;
-            } else {
-                streakAnchor = 0; 
-                streakOffset = 0;
-            }
+                streakAnchor = snapshot.val().anchor || 0; streakOffset = snapshot.val().offset || 0;
+            } else { streakAnchor = 0; streakOffset = 0; }
             recalcStreak();
         });
 
         function recalcStreak() {
-            const validMsgs = currentMessages.filter(m => m.timestamp && m.timestamp >= streakAnchor);
+            const validMsgs = window.currentMessages.filter(m => m.timestamp && m.timestamp >= streakAnchor);
             let mathStreak = 0;
-            
             if (validMsgs.length > 0) {
                 const getStr = (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
                 const uniqueDates = [...new Set(validMsgs.map(m => getStr(new Date(m.timestamp))))].sort().reverse();
-                
                 const today = new Date();
                 const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
                 
@@ -406,20 +595,18 @@
                     }
                 }
             }
-            const finalStreak = mathStreak + streakOffset;
-            document.getElementById('streak-count').innerText = finalStreak.toString();
+            document.getElementById('streak-count').innerText = (mathStreak + streakOffset).toString();
         }
 
         onValue(ref(db, 'settings/remoteLock'), (snapshot) => {
-            if (snapshot.exists() && snapshot.val() === true) {
-                if (typeof window.triggerDestruct === "function") window.triggerDestruct();
-            }
+            if (snapshot.exists() && snapshot.val() === true) if (typeof window.triggerDestruct === "function") window.triggerDestruct();
         });
 
         window.markUnreadAsSeen = function() {
-            currentMessages.forEach(msg => {
+            window.currentMessages.forEach(msg => {
                 if (msg.sender === 'Mohamed' && msg.status !== 'Seen') update(ref(db, 'messages/' + msg.key), { status: 'Seen' });
             });
+            unreadBadge.classList.add('hidden');
         }
 
         const layerLove = document.getElementById('aura-love');
@@ -437,19 +624,11 @@
             layerUrgent.classList.remove('active');
             
             if (latestState === 'urgent') {
-                layerUrgent.classList.add('active');
-                document.body.style.backgroundColor = '#110000'; 
-                themeMeta.content = '#110000'; 
-            }
-            else if (latestState === 'miss') {
-                layerMiss.classList.add('active');
-                document.body.style.backgroundColor = '#0a0612'; 
-                themeMeta.content = '#0a0612'; 
-            }
-            else {
-                layerLove.classList.add('active');
-                document.body.style.backgroundColor = '#1a050f'; 
-                themeMeta.content = '#1a050f'; 
+                layerUrgent.classList.add('active'); document.body.style.backgroundColor = '#110000'; themeMeta.content = '#110000'; 
+            } else if (latestState === 'miss') {
+                layerMiss.classList.add('active'); document.body.style.backgroundColor = '#0a0612'; themeMeta.content = '#0a0612'; 
+            } else {
+                layerLove.classList.add('active'); document.body.style.backgroundColor = '#1a050f'; themeMeta.content = '#1a050f'; 
             }
         });
     </script>
@@ -484,7 +663,6 @@
         const sText = document.getElementById('status-text');
         const fpBtn = document.getElementById('fingerprint');
         const ring = document.getElementById('ring1');
-        
         let isArmed = false;
         let scanTimer;
         let isScanned = false;
@@ -494,24 +672,19 @@
 
         function handleSecretTap(e) {
             e.preventDefault();
-            isArmed = true;
-            sText.style.color = "#ffffff";
-            sText.style.textShadow = "0 0 10px rgba(255,255,255,0.4)";
+            isArmed = true; sText.style.color = "#ffffff"; sText.style.textShadow = "0 0 10px rgba(255,255,255,0.4)";
         }
 
         function startScan(e) { 
             if(isScanned) return; if(e) e.preventDefault(); 
             fpBtn.classList.add('scanning'); sText.innerText = "Verifying..."; sText.style.color = "#fff"; ring.style.animation = "scan-pulse 1s ease-out infinite"; 
-            
             scanTimer = setTimeout(triggerAccess, 2000); 
         }
         
         function stopScan(e) { 
             if(isScanned) return; if(e) e.preventDefault(); 
             clearTimeout(scanTimer); fpBtn.classList.remove('scanning'); 
-            if (!isArmed) {
-                sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; 
-            }
+            if (!isArmed) { sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; }
             ring.style.animation = "none"; 
         }
         
@@ -519,10 +692,7 @@
             if (isArmed) {
                 isScanned = true; 
                 sText.innerText = "Biometrics Accepted."; sText.style.color = "#4ade80"; 
-                
-                if (!isMusicPlaying) {
-                    bgMusic.play().then(() => { document.querySelector('#music-toggle i').className = 'fa-solid fa-volume-high'; isMusicPlaying = true; }).catch(e => console.log("Autoplay blocked"));
-                }
+                if (!isMusicPlaying) { bgMusic.play().then(() => { document.querySelector('#music-toggle i').className = 'fa-solid fa-volume-high'; isMusicPlaying = true; }).catch(e => console.log("Autoplay block")); }
 
                 setTimeout(() => { 
                     document.getElementById('scanner-screen').classList.add('hidden'); 
@@ -538,21 +708,14 @@
                         document.getElementById('scanner-screen').style.display = 'none'; 
                         const dScreen = document.getElementById('dashboard-screen');
                         dScreen.style.display = 'flex'; 
-                        setTimeout(() => {
-                            dScreen.classList.remove('slide-hidden'); 
-                            dScreen.style.pointerEvents = 'auto'; 
-                        }, 50);
+                        setTimeout(() => { dScreen.classList.remove('slide-hidden'); dScreen.style.pointerEvents = 'auto'; }, 50);
                     }, 400); 
                 }, 800); 
 
             } else {
                 sText.innerText = "Biometrics Unrecognized."; sText.style.color = "#ff4757"; sText.style.textShadow = "none";
-                fpBtn.classList.remove('scanning'); 
-                ring.style.animation = "none"; 
-                
-                setTimeout(() => {
-                    sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc";
-                }, 2000);
+                fpBtn.classList.remove('scanning'); ring.style.animation = "none"; 
+                setTimeout(() => { sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; }, 2000);
             }
         }
         
@@ -563,70 +726,38 @@
         window.openCommMenu = function() { 
             dScreen.classList.add('slide-hidden'); 
             setTimeout(() => { 
-                dScreen.style.display = 'none'; 
-                cScreen.style.display = 'flex'; 
-                setTimeout(() => { 
-                    cScreen.classList.remove('slide-hidden'); 
-                    window.isChatOpen = true; 
-                    if(window.markUnreadAsSeen) window.markUnreadAsSeen(); 
-                }, 50); 
+                dScreen.style.display = 'none'; cScreen.style.display = 'flex'; 
+                setTimeout(() => { cScreen.classList.remove('slide-hidden'); window.isChatOpen = true; if(window.markUnreadAsSeen) window.markUnreadAsSeen(); }, 50); 
             }, 400); 
         }
+        
         window.closeCommMenu = function() { 
-            window.isChatOpen = false; 
-            cScreen.classList.add('slide-hidden'); 
-            setTimeout(() => { 
-                cScreen.style.display = 'none'; 
-                dScreen.style.display = 'flex'; 
-                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
-            }, 400); 
+            window.isChatOpen = false; cScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { cScreen.style.display = 'none'; dScreen.style.display = 'flex'; setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); }, 400); 
         }
 
         window.openRecap = function() { 
             dScreen.classList.add('slide-hidden'); 
-            
             setTimeout(() => { 
                 dScreen.style.display = 'none'; 
-                
                 const introOverlay = document.getElementById('recap-intro');
                 introOverlay.style.display = 'flex';
                 
-                const txt1 = document.getElementById('intro-text-1');
-                const txt2 = document.getElementById('intro-text-2');
-                const txt3 = document.getElementById('intro-text-3');
+                const txt1 = document.getElementById('intro-text-1'); const txt2 = document.getElementById('intro-text-2'); const txt3 = document.getElementById('intro-text-3');
                 
-                setTimeout(() => { txt1.classList.add('show'); }, 300);
-                setTimeout(() => { txt1.classList.remove('show'); }, 2500);
-                
-                setTimeout(() => { 
-                    txt2.classList.add('show'); 
-                    txt3.classList.add('show'); 
-                }, 3500);
-                
-                setTimeout(() => { 
-                    txt2.classList.remove('show'); 
-                    txt3.classList.remove('show'); 
-                }, 6000);
+                setTimeout(() => { txt1.classList.add('show'); }, 300); setTimeout(() => { txt1.classList.remove('show'); }, 2500);
+                setTimeout(() => { txt2.classList.add('show'); txt3.classList.add('show'); }, 3500);
+                setTimeout(() => { txt2.classList.remove('show'); txt3.classList.remove('show'); }, 6000);
                 
                 setTimeout(() => {
-                    introOverlay.style.opacity = '0';
-                    rScreen.style.display = 'flex'; 
-                    rScreen.classList.remove('slide-hidden'); 
-                    
+                    introOverlay.style.opacity = '0'; rScreen.style.display = 'flex'; rScreen.classList.remove('slide-hidden'); 
                     setTimeout(() => { introOverlay.style.display = 'none'; introOverlay.style.opacity = '1'; }, 1000);
                     
-                    const paras = document.querySelectorAll('.letter-p');
-                    const sig = document.querySelector('.signature');
-                    paras.forEach(p => p.classList.remove('visible'));
-                    sig.classList.remove('visible');
-
-                    paras.forEach((p, index) => {
-                        setTimeout(() => { p.classList.add('visible'); }, 600 + (index * 800));
-                    });
+                    const paras = document.querySelectorAll('.letter-p'); const sig = document.querySelector('.signature');
+                    paras.forEach(p => p.classList.remove('visible')); sig.classList.remove('visible');
+                    paras.forEach((p, index) => { setTimeout(() => { p.classList.add('visible'); }, 600 + (index * 800)); });
                     setTimeout(() => { sig.classList.add('visible'); }, 600 + (paras.length * 800));
-                    
                 }, 6500);
-                
             }, 400); 
         }
         
@@ -639,125 +770,59 @@
         const lightboxContent = document.getElementById('lightbox-content');
         
         window.openLightbox = function(polaroidElement) {
-            const img = polaroidElement.querySelector('img');
-            const vid = polaroidElement.querySelector('video');
-            
+            const img = polaroidElement.querySelector('img'); const vid = polaroidElement.querySelector('video');
             lightboxContent.innerHTML = ''; 
-            
-            if (img) {
-                const newImg = document.createElement('img');
-                newImg.src = img.src;
-                lightboxContent.appendChild(newImg);
-            } else if (vid) {
-                const newVid = document.createElement('video');
-                newVid.src = vid.src;
-                newVid.autoplay = true;
-                newVid.loop = true;
-                newVid.muted = false; 
-                newVid.playsInline = true;
-                lightboxContent.appendChild(newVid);
-            }
-            
+            if (img) { const newImg = document.createElement('img'); newImg.src = img.src; lightboxContent.appendChild(newImg); } 
+            else if (vid) { const newVid = document.createElement('video'); newVid.src = vid.src; newVid.autoplay = true; newVid.loop = true; newVid.muted = false; newVid.playsInline = true; lightboxContent.appendChild(newVid); }
             lightbox.classList.add('active');
         }
         
-        window.closeLightbox = function() {
-            lightbox.classList.remove('active');
-            setTimeout(() => { lightboxContent.innerHTML = ''; }, 400); 
-        }
+        window.closeLightbox = function() { lightbox.classList.remove('active'); setTimeout(() => { lightboxContent.innerHTML = ''; }, 400); }
 
         window.sendCustomNote = function(btn) {
             const msg = document.getElementById('custom-msg').value.trim();
             if (msg === "") return;
-            window.sendToDatabase(msg, 'love');
-            spawnTapParticles('love', btn);
-            document.getElementById('custom-msg').value = "";
+            window.sendToDatabase(msg, 'love'); spawnTapParticles('love', btn);
+            document.getElementById('custom-msg').value = ""; set(ref(db, 'settings/typing/lara'), false);
         }
-        window.sendQuickNote = function(btn, msg, type) {
-            window.sendToDatabase(msg, type);
-            spawnTapParticles(type, btn);
-        }
+        window.sendQuickNote = function(btn, msg, type) { window.sendToDatabase(msg, type); spawnTapParticles(type, btn); }
 
         function spawnTapParticles(type, element) {
             const rect = element.getBoundingClientRect(), container = document.body;
-            let emojis = ['❤️', '💕', '💖']; 
-            if (type === 'miss') emojis = ['✨', '🌌', '💜'];
-            if (type === 'urgent') emojis = ['⚠️', '💔'];
-
+            let emojis = ['❤️', '💕', '💖']; if (type === 'miss') emojis = ['✨', '🌌', '💜']; if (type === 'urgent') emojis = ['⚠️', '💔'];
             const pCount = Math.floor(Math.random() * 3) + 4; 
             for(let i = 0; i < pCount; i++) {
-                const p = document.createElement('div'); 
-                p.className = 'tap-particle'; 
-                p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-                p.style.fontSize = `${Math.random() * 0.5 + 0.8}rem`;
-                p.style.left = `${rect.left + (rect.width/2) + ((Math.random() - 0.5) * 60)}px`; 
-                p.style.top = `${rect.top + (rect.height/2)}px`;
-                p.style.animationDuration = `${1.2 + Math.random() * 0.8}s`; 
-                container.appendChild(p);
-                setTimeout(() => p.remove(), 2500);
+                const p = document.createElement('div'); p.className = 'tap-particle'; p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                p.style.fontSize = `${Math.random() * 0.5 + 0.8}rem`; p.style.left = `${rect.left + (rect.width/2) + ((Math.random() - 0.5) * 60)}px`; p.style.top = `${rect.top + (rect.height/2)}px`;
+                p.style.animationDuration = `${1.2 + Math.random() * 0.8}s`; container.appendChild(p); setTimeout(() => p.remove(), 2500);
             }
         }
 
         setInterval(() => {
             if (!isScanned || window.currentMood === 'urgent') return;
-            
-            const fxLayer = document.getElementById('ambient-fx');
-            const p = document.createElement('div');
-            p.className = 'bg-particle';
-            
-            let symbols = ['❤️', '💕']; 
-            if(window.currentMood === 'miss') symbols = ['✨', '🫧'];
-
-            p.innerText = symbols[Math.floor(Math.random() * symbols.length)];
-            p.style.left = `${Math.random() * 100}vw`;
-            p.style.animationDuration = `${Math.random() * 6 + 6}s`; 
-            p.style.opacity = Math.random() * 0.2 + 0.05; 
-            p.style.fontSize = `${Math.random() * 1.5 + 0.5}rem`;
-            
-            fxLayer.appendChild(p);
-            setTimeout(() => p.remove(), 12000); 
+            const fxLayer = document.getElementById('ambient-fx'); const p = document.createElement('div'); p.className = 'bg-particle';
+            let symbols = ['❤️', '💕']; if(window.currentMood === 'miss') symbols = ['✨', '🫧'];
+            p.innerText = symbols[Math.floor(Math.random() * symbols.length)]; p.style.left = `${Math.random() * 100}vw`; p.style.animationDuration = `${Math.random() * 6 + 6}s`; p.style.opacity = Math.random() * 0.2 + 0.05; p.style.fontSize = `${Math.random() * 1.5 + 0.5}rem`;
+            fxLayer.appendChild(p); setTimeout(() => p.remove(), 12000); 
         }, 800); 
 
         window.triggerDestruct = function() {
-            document.getElementById('dashboard-screen').style.display = 'none';
-            document.getElementById('dashboard-screen').classList.add('slide-hidden');
-            document.getElementById('communication-screen').style.display = 'none';
-            document.getElementById('communication-screen').classList.add('slide-hidden');
-            document.getElementById('recap-screen').style.display = 'none';
-            document.getElementById('recap-screen').classList.add('slide-hidden');
-            
+            document.getElementById('dashboard-screen').style.display = 'none'; document.getElementById('dashboard-screen').classList.add('slide-hidden');
+            document.getElementById('communication-screen').style.display = 'none'; document.getElementById('communication-screen').classList.add('slide-hidden');
+            document.getElementById('note-screen').style.display = 'none'; document.getElementById('note-screen').classList.add('slide-hidden');
+            document.getElementById('recap-screen').style.display = 'none'; document.getElementById('recap-screen').classList.add('slide-hidden');
             document.getElementById('recap-intro').style.display = 'none';
-            
             if(lightbox.classList.contains('active')) closeLightbox();
-            
-            const scanner = document.getElementById('scanner-screen');
-            scanner.style.display = 'flex';
-            scanner.classList.remove('hidden');
-            
-            isScanned = false;
-            isArmed = false;
-            
-            const sText = document.getElementById('status-text');
-            sText.innerText = "Awaiting Identity";
-            sText.style.color = "#dcdcdc";
-            sText.style.textShadow = "none";
-            
-            const fpBtn = document.getElementById('fingerprint');
-            fpBtn.classList.remove('scanning');
-            const ring = document.getElementById('ring1');
-            ring.style.animation = "none";
-            
+            if(document.getElementById('action-sheet-overlay').classList.contains('active')) closeActionSheet();
+            const scanner = document.getElementById('scanner-screen'); scanner.style.display = 'flex'; scanner.classList.remove('hidden');
+            isScanned = false; isArmed = false; sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; sText.style.textShadow = "none";
+            fpBtn.classList.remove('scanning'); ring.style.animation = "none";
             if (isMusicPlaying) toggleMusic();
         }
         
-        document.addEventListener("visibilitychange", function() {
-            if (document.visibilityState === 'hidden') window.triggerDestruct();
-        });
+        document.addEventListener("visibilitychange", function() { if (document.visibilityState === 'hidden') window.triggerDestruct(); });
         window.addEventListener("pagehide", window.triggerDestruct);
-        
-        window.addEventListener("pageshow", function(e) {
-            if (e.persisted) window.location.reload();
-        });
+        window.addEventListener("pageshow", function(e) { if (e.persisted) window.location.reload(); });
     </script>
 </body>
 </html>
