@@ -10,7 +10,6 @@
     <link rel="apple-touch-icon" href="icon.png">
     
     <title>16.09</title>
-    <!-- Elegant Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -127,7 +126,6 @@
         .cinematic-letter::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff9a9e, #fecfef); }
         .daily-text { font-family: 'Caveat', cursive; font-size: 1.8rem; line-height: 1.5; color: #fff; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; letter-spacing: 1px; }
 
-        /* --- THE CHAT & REPLY STYLES --- */
         .terminal-box { background: transparent; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 10px 5px; -ms-overflow-style: none; scrollbar-width: none; z-index: 10; }
         .terminal-box::-webkit-scrollbar { display: none; }
         .msg { display: flex; flex-direction: column; width: 100%; animation: floatIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(15px) translateZ(0); transform-origin: bottom center; will-change: transform, opacity; position: relative; }
@@ -145,8 +143,7 @@
         .msg-status { font-size: 0.65rem; color: #bbb; margin-top: 6px; display: flex; align-items: center; gap: 5px; font-weight: 500; letter-spacing: 0.3px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
         .status-dot { width: 7px; height: 7px; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
 
-        /* THE REPLY SYSTEM CSS */
-        .reply-btn { cursor: pointer; color: #888; margin-left: 8px; font-size: 0.8rem; padding: 2px 5px; transition: color 0.2s; }
+        .reply-btn { cursor: pointer; color: #888; margin-left: 8px; font-size: 0.8rem; padding: 2px 5px; }
         .reply-btn:active { color: #fff; }
         .quoted-msg { background: rgba(0,0,0,0.25); border-left: 3px solid rgba(255,255,255,0.4); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; color: rgba(255,255,255,0.85); display: flex; flex-direction: column; gap: 3px; }
         .quoted-sender { font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
@@ -311,8 +308,6 @@
             </div>
             
             <div class="chat-footer">
-                
-                <!-- NEW: REPLY PREVIEW BANNER -->
                 <div id="reply-preview" class="reply-preview">
                     <div class="reply-content">
                         <span class="reply-sender" id="reply-sender-name">Replying to...</span>
@@ -327,13 +322,13 @@
                     <div class="chip-btn chip-urgent" onclick="sendQuickNote(this, 'We need to talk.', 'urgent')"><i class="fa-solid fa-triangle-exclamation"></i> Urgent</div>
                 </div>
                 <div class="input-row">
-                    <input type="text" id="custom-msg" class="chat-input" placeholder="Type a message... (Double tap to ❤️)" autocomplete="off">
+                    <input type="text" id="custom-msg" class="chat-input" placeholder="Type a message..." autocomplete="off">
                     <button class="send-btn" onclick="sendCustomNote(this)"><i class="fa-solid fa-arrow-up"></i></button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, serverTimestamp, update, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
@@ -356,7 +351,6 @@
         let streakAnchor = 0;
         let streakOffset = 0;
 
-        // --- NEW: THE REPLY ENGINE ---
         window.replyingTo = null;
 
         window.initReply = function(text, sender) {
@@ -365,26 +359,23 @@
             document.getElementById('reply-preview-text').innerText = text;
             document.getElementById('reply-preview').classList.add('active');
             document.getElementById('custom-msg').focus();
-        }
+        };
 
         window.cancelReply = function() {
             window.replyingTo = null;
             document.getElementById('reply-preview').classList.remove('active');
-        }
+        };
 
         window.sendToDatabase = function(messageText, type) {
             let payload = { sender: 'Lara', text: messageText, status: 'Delivered', timestamp: serverTimestamp(), msgType: type };
-            
-            // Attach the quoted reply if it exists, then instantly close the banner
             if (window.replyingTo) {
                 payload.replyTo = window.replyingTo;
                 window.cancelReply();
             }
-
             push(ref(db, 'messages'), payload);
             push(ref(db, 'aura'), { state: type });
             set(ref(db, 'settings/typing/lara'), false);
-        }
+        };
 
         const chatHistory = document.getElementById('chat-history');
         const unreadBadge = document.getElementById('unread-badge');
@@ -408,18 +399,12 @@
                     
                     let statusText = msg.sender === 'Lara' ? `${msg.status || 'Delivered'}` : `Mohamed`;
                     let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
-                    
-                    // Safely escape the message text so it doesn't break the HTML quote marks
-                    let safeText = msg.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
-                    
-                    // Add the elegant Reply Arrow Button
+                    let safeText = (msg.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
                     let replyIcon = `<i class="fa-solid fa-reply reply-btn" onclick="initReply('${safeText}', '${msg.sender}')"></i>`;
                     const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time} ${replyIcon}` : `${statusText} • ${time} ${replyIcon}`;
                     
                     let reactionHtml = msg.reaction ? `<div class="reaction-badge">${msg.reaction}</div>` : '';
                     let hasHeartStr = msg.reaction ? 'true' : 'false';
-
-                    // Build the quoted message block if this message is a reply
                     let replyBlockHtml = msg.replyTo ? `<div class="quoted-msg"><span class="quoted-sender">${msg.replyTo.sender}</span><span>${msg.replyTo.text}</span></div>` : '';
 
                     const existingMsg = document.getElementById('msg-' + msgKey);
@@ -434,11 +419,11 @@
                             existingReact.remove();
                         }
                         
-                        existingMsg.querySelector('.msg-bubble').setAttribute('ondblclick', `toggleHeart('${msgKey}', ${hasHeartStr})`);
+                        existingMsg.querySelector('.msg-bubble').onclick = () => window.handleMessageTap(msgKey, hasHeartStr === 'true');
                     } else {
                         const htmlStr = `
                             <div class="msg ${cssClass}" id="msg-${msgKey}">
-                                <div class="msg-bubble" ondblclick="toggleHeart('${msgKey}', ${hasHeartStr})">
+                                <div class="msg-bubble" id="bubble-${msgKey}">
                                     ${replyBlockHtml}
                                     ${msg.text}
                                     ${reactionHtml}
@@ -447,6 +432,10 @@
                             </div>
                         `;
                         chatHistory.insertAdjacentHTML('beforeend', htmlStr);
+                        const newBubble = document.getElementById('bubble-' + msgKey);
+                        if (newBubble) {
+                            newBubble.onclick = () => window.handleMessageTap(msgKey, hasHeartStr === 'true');
+                        }
                         setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 10);
                     }
                 });
@@ -469,13 +458,28 @@
             recalcStreak();
         });
 
+        // Reliable double-tap handling for mobile and desktop
+        let lastTapTime = 0;
+        let lastTapKey = null;
+        window.handleMessageTap = function(msgKey, currentlyHasHeart) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+            if (tapLength < 350 && tapLength > 0 && lastTapKey === msgKey) {
+                window.toggleHeart(msgKey, currentlyHasHeart);
+                lastTapTime = 0;
+            } else {
+                lastTapTime = currentTime;
+                lastTapKey = msgKey;
+            }
+        };
+
         window.toggleHeart = function(msgKey, currentlyHasHeart) {
             if (currentlyHasHeart) {
                 update(ref(db, 'messages/' + msgKey), { reaction: null });
             } else {
                 update(ref(db, 'messages/' + msgKey), { reaction: '❤️' });
             }
-        }
+        };
 
         const typingIndicator = document.getElementById('typing-indicator');
         onValue(ref(db, 'settings/typing/mohamed'), (snapshot) => {
@@ -529,7 +533,7 @@
                 nScreen.style.display = 'flex'; 
                 setTimeout(() => { nScreen.classList.remove('slide-hidden'); }, 50); 
             }, 400); 
-        }
+        };
 
         window.closeNote = function() {
             const dScreen = document.getElementById('dashboard-screen');
@@ -540,7 +544,7 @@
                 dScreen.style.display = 'flex'; 
                 setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
             }, 400); 
-        }
+        };
 
         onValue(ref(db, 'settings/streakState'), (snapshot) => {
             if(snapshot.exists()) {
@@ -554,18 +558,26 @@
             const validMsgs = currentMessages.filter(m => m.timestamp && m.timestamp >= streakAnchor);
             let mathStreak = 0;
             if (validMsgs.length > 0) {
-                const getStr = (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-                const uniqueDates = [...new Set(validMsgs.map(m => getStr(new Date(m.timestamp))))].sort().reverse();
-                const today = new Date();
-                const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+                const getYearMonthDay = (timestamp) => {
+                    const d = new Date(timestamp);
+                    return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
+                };
+                const uniqueDates = [...new Set(validMsgs.map(m => getYearMonthDay(m.timestamp)))].sort().reverse();
+                const now = new Date();
+                const todayStr = getYearMonthDay(now.getTime());
+                const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+                const yesterdayStr = getYearMonthDay(yesterday.getTime());
                 
-                if (uniqueDates[0] === getStr(today) || uniqueDates[0] === getStr(yesterday)) {
+                if (uniqueDates[0] === todayStr || uniqueDates[0] === yesterdayStr) {
                     mathStreak = 1;
-                    let currDate = new Date(uniqueDates[0] + 'T12:00:00'); 
+                    let targetDate = new Date(now.getFullYear(), now.getMonth(), uniqueDates[0] === todayStr ? now.getDate() : now.getDate() - 1);
                     for (let i = 1; i < uniqueDates.length; i++) {
-                        currDate.setDate(currDate.getDate() - 1);
-                        if (uniqueDates[i] === getStr(currDate)) mathStreak++;
-                        else break;
+                        targetDate.setDate(targetDate.getDate() - 1);
+                        if (uniqueDates[i] === getYearMonthDay(targetDate.getTime())) {
+                            mathStreak++;
+                        } else {
+                            break;
+                        }
                     }
                 }
             }
@@ -581,7 +593,7 @@
                 if (msg.sender === 'Mohamed' && msg.status !== 'Seen') update(ref(db, 'messages/' + msg.key), { status: 'Seen' });
             });
             unreadBadge.classList.add('hidden');
-        }
+        };
 
         const layerLove = document.getElementById('aura-love');
         const layerMiss = document.getElementById('aura-miss');
@@ -626,18 +638,25 @@
             isMusicPlaying = !isMusicPlaying;
         }
 
+        // Absolute Integer Date instantiation: immune to mobile Safari/Android NaN parser failures
         function startCounter() {
             if (counterInterval) clearInterval(counterInterval);
-            const startDate = new Date("2026-09-16T00:00:00").getTime();
-            counterInterval = setInterval(() => {
-                const distance = new Date().getTime() - startDate;
+            // Year: 2026, Month: 8 (September, 0-indexed), Day: 16, Hours: 0, Minutes: 0, Seconds: 0
+            const startDate = new Date(2026, 8, 16, 0, 0, 0).getTime();
+            
+            const updateTime = () => {
+                const now = new Date().getTime();
+                const distance = now - startDate;
                 if (distance > 0) {
                     document.getElementById("count-days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
                     document.getElementById("count-hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
                     document.getElementById("count-mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
                     document.getElementById("count-secs").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
                 }
-            }, 1000);
+            };
+            
+            updateTime();
+            counterInterval = setInterval(updateTime, 1000);
         }
 
         const sText = document.getElementById('status-text');
@@ -647,7 +666,7 @@
         let scanTimer;
         let isScanned = false;
 
-        sText.addEventListener('touchstart', handleSecretTap);
+        sText.addEventListener('touchstart', handleSecretTap, { passive: false });
         sText.addEventListener('mousedown', handleSecretTap);
 
         function handleSecretTap(e) {
@@ -658,14 +677,20 @@
         }
 
         function startScan(e) { 
-            if(isScanned) return; if(e) e.preventDefault(); 
-            fpBtn.classList.add('scanning'); sText.innerText = "Verifying..."; sText.style.color = "#fff"; ring.style.animation = "scan-pulse 1s ease-out infinite"; 
+            if(isScanned) return; 
+            if(e && e.cancelable) e.preventDefault(); 
+            fpBtn.classList.add('scanning'); 
+            sText.innerText = "Verifying..."; 
+            sText.style.color = "#fff"; 
+            ring.style.animation = "scan-pulse 1s ease-out infinite"; 
             scanTimer = setTimeout(triggerAccess, 2000); 
         }
         
         function stopScan(e) { 
-            if(isScanned) return; if(e) e.preventDefault(); 
-            clearTimeout(scanTimer); fpBtn.classList.remove('scanning'); 
+            if(isScanned) return; 
+            if(e && e.cancelable) e.preventDefault(); 
+            clearTimeout(scanTimer); 
+            fpBtn.classList.remove('scanning'); 
             if (!isArmed) { sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; }
             ring.style.animation = "none"; 
         }
@@ -673,8 +698,14 @@
         function triggerAccess() { 
             if (isArmed) {
                 isScanned = true; 
-                sText.innerText = "Biometrics Accepted."; sText.style.color = "#4ade80"; 
-                if (!isMusicPlaying) { bgMusic.play().then(() => { document.querySelector('#music-toggle i').className = 'fa-solid fa-volume-high'; isMusicPlaying = true; }).catch(e => console.log("Autoplay block")); }
+                sText.innerText = "Biometrics Accepted."; 
+                sText.style.color = "#4ade80"; 
+                if (!isMusicPlaying) { 
+                    bgMusic.play().then(() => { 
+                        document.querySelector('#music-toggle i').className = 'fa-solid fa-volume-high'; 
+                        isMusicPlaying = true; 
+                    }).catch(e => console.log("Autoplay block")); 
+                }
 
                 setTimeout(() => { 
                     document.getElementById('scanner-screen').classList.add('hidden'); 
@@ -695,28 +726,46 @@
                 }, 800); 
 
             } else {
-                sText.innerText = "Biometrics Unrecognized."; sText.style.color = "#ff4757"; sText.style.textShadow = "none";
-                fpBtn.classList.remove('scanning'); ring.style.animation = "none"; 
+                sText.innerText = "Biometrics Unrecognized."; 
+                sText.style.color = "#ff4757"; 
+                sText.style.textShadow = "none";
+                fpBtn.classList.remove('scanning'); 
+                ring.style.animation = "none"; 
                 setTimeout(() => { sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; }, 2000);
             }
         }
         
-        fpBtn.addEventListener('mousedown', startScan); fpBtn.addEventListener('mouseup', stopScan); fpBtn.addEventListener('mouseleave', stopScan); fpBtn.addEventListener('touchstart', startScan); fpBtn.addEventListener('touchend', stopScan); fpBtn.addEventListener('touchcancel', stopScan);
+        fpBtn.addEventListener('mousedown', startScan);
+        fpBtn.addEventListener('mouseup', stopScan);
+        fpBtn.addEventListener('mouseleave', stopScan);
+        fpBtn.addEventListener('touchstart', startScan, { passive: false });
+        fpBtn.addEventListener('touchend', stopScan, { passive: false });
+        fpBtn.addEventListener('touchcancel', stopScan, { passive: false });
 
         const cScreen = document.getElementById('communication-screen'), dScreen = document.getElementById('dashboard-screen'), rScreen = document.getElementById('recap-screen');
         
         window.openCommMenu = function() { 
             dScreen.classList.add('slide-hidden'); 
             setTimeout(() => { 
-                dScreen.style.display = 'none'; cScreen.style.display = 'flex'; 
-                setTimeout(() => { cScreen.classList.remove('slide-hidden'); window.isChatOpen = true; if(window.markUnreadAsSeen) window.markUnreadAsSeen(); }, 50); 
+                dScreen.style.display = 'none'; 
+                cScreen.style.display = 'flex'; 
+                setTimeout(() => { 
+                    cScreen.classList.remove('slide-hidden'); 
+                    window.isChatOpen = true; 
+                    if(window.markUnreadAsSeen) window.markUnreadAsSeen(); 
+                }, 50); 
             }, 400); 
-        }
+        };
         
         window.closeCommMenu = function() { 
-            window.isChatOpen = false; cScreen.classList.add('slide-hidden'); 
-            setTimeout(() => { cScreen.style.display = 'none'; dScreen.style.display = 'flex'; setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); }, 400); 
-        }
+            window.isChatOpen = false; 
+            cScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { 
+                cScreen.style.display = 'none'; 
+                dScreen.style.display = 'flex'; 
+                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
+            }, 400); 
+        };
 
         window.openRecap = function() { 
             dScreen.classList.add('slide-hidden'); 
@@ -753,12 +802,16 @@
                     
                 }, 6500);
             }, 400); 
-        }
+        };
         
         window.closeRecap = function() { 
             rScreen.classList.add('slide-hidden'); 
-            setTimeout(() => { rScreen.style.display = 'none'; dScreen.style.display = 'flex'; setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); }, 400); 
-        }
+            setTimeout(() => { 
+                rScreen.style.display = 'none'; 
+                dScreen.style.display = 'flex'; 
+                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
+            }, 400); 
+        };
 
         const lightbox = document.getElementById('lightbox');
         const lightboxContent = document.getElementById('lightbox-content');
@@ -782,12 +835,12 @@
                 lightboxContent.appendChild(newVid);
             }
             lightbox.classList.add('active');
-        }
+        };
         
         window.closeLightbox = function() {
             lightbox.classList.remove('active');
             setTimeout(() => { lightboxContent.innerHTML = ''; }, 400); 
-        }
+        };
 
         window.sendCustomNote = function(btn) {
             const msg = document.getElementById('custom-msg').value.trim();
@@ -795,11 +848,12 @@
             window.sendToDatabase(msg, 'love');
             spawnTapParticles('love', btn);
             document.getElementById('custom-msg').value = "";
-        }
+        };
+
         window.sendQuickNote = function(btn, msg, type) {
             window.sendToDatabase(msg, type);
             spawnTapParticles(type, btn);
-        }
+        };
 
         function spawnTapParticles(type, element) {
             const rect = element.getBoundingClientRect(), container = document.body;
@@ -838,27 +892,32 @@
         }, 800); 
 
         window.triggerDestruct = function() {
-            document.getElementById('dashboard-screen').style.display = 'none'; document.getElementById('dashboard-screen').classList.add('slide-hidden');
-            document.getElementById('communication-screen').style.display = 'none'; document.getElementById('communication-screen').classList.add('slide-hidden');
-            document.getElementById('note-screen').style.display = 'none'; document.getElementById('note-screen').classList.add('slide-hidden');
-            document.getElementById('recap-screen').style.display = 'none'; document.getElementById('recap-screen').classList.add('slide-hidden');
+            document.getElementById('dashboard-screen').style.display = 'none'; 
+            document.getElementById('dashboard-screen').classList.add('slide-hidden');
+            document.getElementById('communication-screen').style.display = 'none'; 
+            document.getElementById('communication-screen').classList.add('slide-hidden');
+            document.getElementById('note-screen').style.display = 'none'; 
+            document.getElementById('note-screen').classList.add('slide-hidden');
+            document.getElementById('recap-screen').style.display = 'none'; 
+            document.getElementById('recap-screen').classList.add('slide-hidden');
             
             document.getElementById('recap-intro').style.display = 'none';
             if(lightbox.classList.contains('active')) closeLightbox();
             
             const scanner = document.getElementById('scanner-screen');
-            scanner.style.display = 'flex'; scanner.classList.remove('hidden');
+            scanner.style.display = 'flex'; 
+            scanner.classList.remove('hidden');
             
-            isScanned = false; isArmed = false;
-            const sText = document.getElementById('status-text');
-            sText.innerText = "Awaiting Identity"; sText.style.color = "#dcdcdc"; sText.style.textShadow = "none";
-            const fpBtn = document.getElementById('fingerprint');
+            isScanned = false; 
+            isArmed = false;
+            sText.innerText = "Awaiting Identity"; 
+            sText.style.color = "#dcdcdc"; 
+            sText.style.textShadow = "none";
             fpBtn.classList.remove('scanning'); 
-            const ring = document.getElementById('ring1');
-            ring.style.animation = "none";
+            ring.style.animation = "none"; 
             
             if (isMusicPlaying) toggleMusic();
-        }
+        };
         
         document.addEventListener("visibilitychange", function() { if (document.visibilityState === 'hidden') window.triggerDestruct(); });
         window.addEventListener("pagehide", window.triggerDestruct);
