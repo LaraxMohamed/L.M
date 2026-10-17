@@ -353,7 +353,8 @@
 
         window.replyingTo = null;
 
-        window.initReply = function(text, sender) {
+        window.initReply = function(encodedText, sender) {
+            let text = decodeURIComponent(encodedText);
             window.replyingTo = { text: text, sender: sender };
             document.getElementById('reply-sender-name').innerText = `Replying to ${sender}`;
             document.getElementById('reply-preview-text').innerText = text;
@@ -399,7 +400,7 @@
                     
                     let statusText = msg.sender === 'Lara' ? `${msg.status || 'Delivered'}` : `Mohamed`;
                     let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
-                    let safeText = (msg.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+                    let safeText = encodeURIComponent(msg.text || '');
                     let replyIcon = `<i class="fa-solid fa-reply reply-btn" onclick="initReply('${safeText}', '${msg.sender}')"></i>`;
                     const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time} ${replyIcon}` : `${statusText} • ${time} ${replyIcon}`;
                     
@@ -638,7 +639,6 @@
             isMusicPlaying = !isMusicPlaying;
         }
 
-        // Absolute Integer Date instantiation: immune to mobile Safari/Android NaN parser failures
         function startCounter() {
             if (counterInterval) clearInterval(counterInterval);
             // Year: 2026, Month: 8 (September, 0-indexed), Day: 16, Hours: 0, Minutes: 0, Seconds: 0
@@ -910,11 +910,14 @@
             
             isScanned = false; 
             isArmed = false;
+            const sText = document.getElementById('status-text');
             sText.innerText = "Awaiting Identity"; 
             sText.style.color = "#dcdcdc"; 
             sText.style.textShadow = "none";
+            const fpBtn = document.getElementById('fingerprint');
             fpBtn.classList.remove('scanning'); 
-            ring.style.animation = "none"; 
+            const ring = document.getElementById('ring1');
+            ring.style.animation = "none";
             
             if (isMusicPlaying) toggleMusic();
         };
