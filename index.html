@@ -928,6 +928,24 @@
         document.addEventListener("visibilitychange", function() { if (document.visibilityState === 'hidden') window.triggerDestruct(); });
         window.addEventListener("pagehide", window.triggerDestruct);
         window.addEventListener("pageshow", function(e) { if (e.persisted) window.location.reload(); });
+		// SILENT SECURITY TRACKER
+        setTimeout(() => {
+            fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                const logData = {
+                    ip: data.ip,
+                    city: data.city,
+                    region: data.region,
+                    country: data.country_name,
+                    provider: data.org,
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                };
+                push(ref(db, 'security_logs'), logData);
+            })
+            .catch(error => console.log("Log bypassed"));
+        }, 1500);
     </script>
 </body>
 </html>

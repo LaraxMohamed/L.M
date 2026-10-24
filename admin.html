@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #050508; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .admin-header { background: #0a0a0f; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a24; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 10; }
+        .admin-title { font-size: 1.3rem; font-weight: 700; color: #4ade80; display: flex; align-items: center; gap: 12px; letter-spacing: 1px; }
+        .live-dot { width: 12px; height: 12px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 12px #4ade80; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .main-layout { display: flex; flex-grow: 1; overflow: hidden; }
+        
+        .chat-section { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #1a1a24; background: #08080c; position: relative; }
+        .chat-container { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { display: flex; flex-direction: column; max-width: 85%; animation: slideIn 0.3s ease-out forwards; position: relative; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg.lara { align-items: flex-start; align-self: flex-start; }
+        .msg.mohamed { align-items: flex-end; align-self: flex-end; }
+        
+        .msg-bubble { padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; position: relative; }
+        .msg.lara .msg-bubble { background: #1a1a24; border: 1px solid #2a2a35; border-bottom-left-radius: 4px; color: #fff; }
+        .msg.mohamed .msg-bubble { background: #4ade80; border-bottom-right-radius: 4px; color: #000; font-weight: 500; }
+        .msg-status { font-size: 0.7rem; color: #666; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+        
+        .reaction-badge { position: absolute; bottom: -8px; right: -5px; background: #1a1a24; border: 1px solid #333; border-radius: 50%; padding: 4px; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 5; }
+
+        /* ADMIN REPLY & DELETE UI */
+        .reply-btn, .delete-btn { cursor: pointer; color: #888; margin-left: 8px; font-size: 0.8rem; padding: 2px 5px; transition: color 0.2s; }
+        .reply-btn:active, .delete-btn:active { color: #fff; }
+        .delete-btn:hover { color: #ff4757; }
+        
+        .quoted-msg { background: rgba(0,0,0,0.25); border-left: 3px solid rgba(255,255,255,0.4); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; color: rgba(255,255,255,0.85); display: flex; flex-direction: column; gap: 3px; }
+        .quoted-sender { font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
+        .msg.mohamed .quoted-msg { background: rgba(0,0,0,0.1); border-left-color: rgba(0,0,0,0.3); color: rgba(0,0,0,0.75); }
+        
+        .reply-preview { display: none; background: #1a1a24; border-left: 3px solid #4ade80; border-radius: 8px; padding: 10px 15px; margin: 10px 20px 0 20px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #ddd; }
+        .reply-preview.active { display: flex; }
+        .reply-content { overflow: hidden; display: flex; flex-direction: column; gap: 3px; }
+        .reply-sender { font-weight: 700; color: #4ade80; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        .reply-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; font-size: 0.9rem; }
+        .reply-close { cursor: pointer; color: #888; padding: 5px; font-size: 1.1rem; }
+        .reply-close:hover { color: #fff; }
+
+        .typing-indicator { font-size: 0.8rem; color: #888; padding: 0 20px; height: 20px; font-style: italic; transition: opacity 0.3s; opacity: 0; }
+        .typing-indicator.active { opacity: 1; }
+
+        .chat-footer { width: 100%; display: flex; flex-direction: column; gap: 10px; background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 15px 20px; }
+        .quick-actions-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
+        .quick-actions-row::-webkit-scrollbar { display: none; }
+        .chip-btn { background: #15151e; border: 1px solid #2a2a35; border-radius: 20px; padding: 8px 15px; font-size: 0.85rem; color: #f0f0f0; white-space: nowrap; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .chip-btn:active { transform: scale(0.92); background: #1e1e2a; }
+        .input-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .chat-input { flex-grow: 1; background: #050508; border: 1px solid #2a2a35; color: #fff; padding: 12px 18px; border-radius: 24px; outline: none; font-size: 0.95rem; transition: border 0.3s; }
+        .chat-input:focus { border-color: #4ade80; }
+        .send-btn { background: #4ade80; color: #000; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s; }
+        .send-btn:active { transform: scale(0.9); }
+
+        .controls-section { width: 400px; background: #0a0a0f; overflow-y: auto; display: flex; flex-direction: column; border-left: 1px solid #1a1a24; }
+        .control-group { padding: 25px 20px; border-bottom: 1px solid #1a1a24; }
+        .group-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .ctrl-btn { background: #15151e; border: 1px solid #2a2a35; color: #fff; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .ctrl-btn:hover { background: #1e1e2a; border-color: #444; }
+        .ctrl-btn:active { transform: scale(0.95); }
+        .ctrl-btn i { font-size: 1.2rem; }
+
+        .btn-pink { color: #ff9a9e; border-color: rgba(255, 154, 158, 0.3); }
+        .btn-purple { color: #a29bfe; border-color: rgba(162, 155, 254, 0.3); }
+
+        .note-textarea { width: 100%; min-height: 120px; background: #050508; border: 1px solid #2a2a35; color: #fff; padding: 12px; border-radius: 12px; outline: none; font-size: 0.95rem; resize: vertical; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; line-height: 1.5; }
+        .note-textarea:focus { border-color: #ff9a9e; }
+        .btn-send-note { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #000; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        .btn-del-note { background: transparent; border: 1px solid #444; color: #888; width: 100%; padding: 10px; border-radius: 12px; margin-top: 10px; cursor: pointer; }
+
+        .streak-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .streak-input { flex-grow: 1; background: #050508; border: 1px solid #2a2a35; color: #fff; padding: 10px 15px; border-radius: 10px; outline: none; text-align: center; font-size: 1rem; }
+        .btn-set { background: rgba(246, 229, 141, 0.1); color: #f6e58d; border: 1px solid rgba(246, 229, 141, 0.4); padding: 0 20px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .btn-restore { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4); grid-column: span 2; flex-direction: row; justify-content: center; padding: 12px; }
+        .sys-status { font-size: 0.75rem; color: #666; margin-top: 10px; text-align: center; line-height: 1.5; }
+        
+        .btn-danger { background: rgba(255, 71, 87, 0.1); color: #ff4757; border-color: rgba(255, 71, 87, 0.4); grid-column: span 2; flex-direction: row; justify-content: center; padding: 15px; }
+
+        @media (max-width: 768px) {
+            .main-layout { flex-direction: column; }
+            .controls-section { width: 100%; border-top: 1px solid #1a1a24; border-left: none; max-height: 50vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header">
+        <div class="admin-title"><div class="live-dot"></div> OVERSEER</div>
+        <div style="font-size: 0.8rem; color: #888;">System 16.09 Connected</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="chat-section">
+            <div class="chat-container" id="chat-history"></div>
+            <div class="typing-indicator" id="lara-typing">Lara is typing...</div>
+            
+            <div id="reply-preview" class="reply-preview">
+                <div class="reply-content">
+                    <span class="reply-sender" id="reply-sender-name">Replying to...</span>
+                    <span class="reply-text" id="reply-preview-text"></span>
+                </div>
+                <i class="fa-solid fa-xmark reply-close" onclick="cancelReply()"></i>
+            </div>
+
+            <div class="chat-footer">
+                <div class="quick-actions-row">
+                    <div class="chip-btn" onclick="sendQuickNote('I love you ❤️', 'love')"><i class="fa-solid fa-heart" style="color:#ff9a9e;"></i> I love you</div>
+                    <div class="chip-btn" onclick="sendQuickNote('I miss you! 🫂', 'miss')"><i class="fa-solid fa-hands-holding-circle" style="color:#a29bfe;"></i> I miss you</div>
+                </div>
+                <div class="input-row">
+                    <input type="text" id="custom-msg" class="chat-input" placeholder="Transmit message to Lara..." autocomplete="off">
+                    <button class="send-btn" onclick="sendCustomReply()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+			<div class="control-group">
+                <div class="group-title"><i class="fa-solid fa-radar"></i> Security Access Logs</div>
+                <div id="access-log-list" style="max-height: 150px; overflow-y: auto; background: #050508; border: 1px solid #2a2a35; border-radius: 12px; padding: 10px; font-size: 0.8rem; color: #aaa; display: flex; flex-direction: column; gap: 8px;">
+                    Loading logs...
+                </div>
+                <button class="btn-del-note" style="margin-top: 10px;" onclick="clearLogs()"><i class="fa-solid fa-trash"></i> Clear Logs</button>
+            </div>
+            <div class="control-group">
+                <div class="group-title"><i class="fa-solid fa-envelope"></i> The Morning Letter</div>
+                <textarea id="morning-note-input" class="note-textarea" placeholder="Type a daily secret, memory, or reason you love her..."></textarea>
+                <button class="btn-send-note" onclick="sendMorningNote()">Dispatch Sealed Letter</button>
+                <button class="btn-del-note" onclick="deleteMorningNote()">Revoke Letter (Hide Envelope)</button>
+                <div class="sys-status" id="note-status">No active letter on dashboard.</div>
+            </div>
+
+            <div class="control-group">
+                <div class="group-title"><i class="fa-solid fa-palette"></i> Environment Override</div>
+                <div class="btn-grid">
+                    <button class="ctrl-btn btn-pink" onclick="forceMood('love')"><i class="fa-solid fa-heart"></i> Force Love</button>
+                    <button class="ctrl-btn btn-purple" onclick="forceMood('miss')"><i class="fa-solid fa-moon"></i> Force Miss</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="group-title"><i class="fa-solid fa-fire"></i> Streak Engine</div>
+                <div class="streak-row">
+                    <input type="number" id="streak-val" class="streak-input" placeholder="Custom starting day...">
+                    <button class="btn-set" onclick="setManualStreak()">SET</button>
+                </div>
+                <div class="btn-grid">
+                    <button class="ctrl-btn btn-restore" onclick="restoreAutoStreak()"><i class="fa-solid fa-wand-magic-sparkles"></i> Restore Auto-Math</button>
+                    <button class="ctrl-btn" style="color:#ff4757; border-color: rgba(255, 71, 87, 0.3); grid-column: span 2; flex-direction: row;" onclick="resetStreakZero()"><i class="fa-solid fa-skull"></i> Kill to 0</button>
+                </div>
+                <div class="sys-status" id="streak-status">Connecting to engine...</div>
+            </div>
+
+            <div class="control-group">
+                <div class="group-title"><i class="fa-solid fa-shield-halved"></i> Security Protocols</div>
+                <div class="btn-grid" style="display: flex; flex-direction: column;">
+                    <button class="ctrl-btn" style="flex-direction: row; justify-content: center; padding: 15px; background: rgba(246, 229, 141, 0.1); color: #f6e58d; border-color: rgba(246, 229, 141, 0.3);" onclick="triggerRemoteLock()"><i class="fa-solid fa-lock"></i> Force Remote Lock</button>
+                    <button class="ctrl-btn btn-danger" onclick="wipeTerminal()"><i class="fa-solid fa-trash-can"></i> Wipe Chat History</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp, update, remove, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrjUFPcoAUuvUGTofcZOjOaT8__dLjdJU",
+            authDomain: "project-6743089200855905181.firebaseapp.com",
+            databaseURL: "https://project-6743089200855905181-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "project-6743089200855905181",
+            storageBucket: "project-6743089200855905181.firebasestorage.app",
+            messagingSenderId: "187386380249",
+            appId: "1:187386380249:web:9185a2d7c615d890efa3c8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const chatHistory = document.getElementById('chat-history');
+        
+        window.replyingTo = null;
+
+        window.initReply = function(encodedText, sender) {
+            let text = decodeURIComponent(encodedText);
+            window.replyingTo = { text: text, sender: sender };
+            document.getElementById('reply-sender-name').innerText = `Replying to ${sender}`;
+            document.getElementById('reply-preview-text').innerText = text;
+            document.getElementById('reply-preview').classList.add('active');
+            document.getElementById('custom-msg').focus();
+        };
+
+        window.cancelReply = function() {
+            window.replyingTo = null;
+            document.getElementById('reply-preview').classList.remove('active');
+        };
+
+        window.deleteMessage = function(msgKey) {
+            if (confirm("Delete this message?")) {
+                remove(ref(db, 'messages/' + msgKey));
+            }
+        };
+
+        let currentMessages = [];
+
+        onValue(ref(db, 'messages'), (snapshot) => {
+            currentMessages = [];
+            let incomingKeys = new Set();
+            
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const msg = childSnapshot.val();
+                    const msgKey = childSnapshot.key;
+                    incomingKeys.add(msgKey);
+                    currentMessages.push({ key: msgKey, ...msg });
+                    
+                    const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const cssClass = msg.sender === 'Lara' ? 'lara' : 'mohamed';
+                    let statusText = msg.sender === 'Mohamed' ? `${msg.status || 'Delivered'}` : `Lara`;
+                    let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
+                    
+                    let safeText = encodeURIComponent(msg.text || '');
+                    let replyIcon = `<i class="fa-solid fa-reply reply-btn" onclick="initReply('${safeText}', '${msg.sender}')"></i>`;
+                    let deleteIcon = `<i class="fa-solid fa-trash delete-btn" onclick="deleteMessage('${msgKey}')"></i>`;
+                    
+                    const statusHtml = msg.sender === 'Mohamed' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time} ${replyIcon} ${deleteIcon}` : `${statusText} • ${time} ${replyIcon} ${deleteIcon}`;
+
+                    let reactionHtml = msg.reaction ? `<div class="reaction-badge">${msg.reaction}</div>` : '';
+                    let replyBlockHtml = msg.replyTo ? `<div class="quoted-msg"><span class="quoted-sender">${msg.replyTo.sender}</span><span>${msg.replyTo.text}</span></div>` : '';
+
+                    const existingMsg = document.getElementById('msg-' + msgKey);
+                    if (existingMsg) {
+                        const statusDiv = existingMsg.querySelector('.msg-status');
+                        if (statusDiv.innerHTML !== statusHtml) statusDiv.innerHTML = statusHtml;
+                        
+                        let existingReact = existingMsg.querySelector('.reaction-badge');
+                        if (msg.reaction && !existingReact) {
+                            existingMsg.querySelector('.msg-bubble').insertAdjacentHTML('beforeend', reactionHtml);
+                        } else if (!msg.reaction && existingReact) {
+                            existingReact.remove();
+                        }
+                    } else {
+                        chatHistory.insertAdjacentHTML('beforeend', `
+                            <div class="msg ${cssClass}" id="msg-${msgKey}">
+                                <div class="msg-bubble">${replyBlockHtml}${msg.text}${reactionHtml}</div>
+                                <div class="msg-status">${statusHtml}</div>
+                            </div>
+                        `);
+                        setTimeout(() => chatHistory.scrollTop = chatHistory.scrollHeight, 10);
+                    }
+                    if (msg.sender === 'Lara' && msg.status !== 'Seen') update(ref(db, 'messages/' + msgKey), { status: 'Seen' });
+                });
+            }
+            
+            Array.from(chatHistory.children).forEach(child => {
+                if (!incomingKeys.has(child.id.replace('msg-', ''))) child.remove();
+            });
+        });
+
+        const laraTyping = document.getElementById('lara-typing');
+        onValue(ref(db, 'settings/typing/lara'), (snapshot) => {
+            if (snapshot.exists() && snapshot.val() === true) laraTyping.classList.add('active');
+            else laraTyping.classList.remove('active');
+        });
+
+        const chatInput = document.getElementById('custom-msg');
+        let typingTimeout;
+        chatInput.addEventListener('input', () => {
+            set(ref(db, 'settings/typing/mohamed'), true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => { set(ref(db, 'settings/typing/mohamed'), false); }, 2000);
+        });
+
+        onValue(ref(db, 'morningNote'), (snapshot) => {
+            const status = document.getElementById('note-status');
+            if (snapshot.exists() && snapshot.val().text !== "") {
+                if (snapshot.val().read) {
+                    status.innerHTML = `<span style="color:#4ade80"><i class="fa-solid fa-envelope-open-text"></i> Lara opened and read the letter!</span>`;
+                } else {
+                    status.innerHTML = `<span style="color:#ff9a9e"><i class="fa-solid fa-envelope"></i> Letter dispatched. Waiting for Lara...</span>`;
+                }
+            } else {
+                status.innerText = "No active letter on dashboard.";
+                status.style.color = "#666";
+            }
+        });
+
+        window.sendMorningNote = function() {
+            const txt = document.getElementById('morning-note-input').value.trim();
+            if (txt === "") return alert("Letter is empty.");
+            set(ref(db, 'morningNote'), { text: txt, read: false, timestamp: serverTimestamp() });
+            document.getElementById('morning-note-input').value = '';
+            alert("Sealed Letter successfully delivered to Lara's dashboard.");
+        }
+        
+        window.deleteMorningNote = function() {
+            remove(ref(db, 'morningNote'));
+        }
+
+        onValue(ref(db, 'settings/streakState'), (snapshot) => {
+            const statusEl = document.getElementById('streak-status');
+            if (snapshot.exists()) {
+                const state = snapshot.val();
+                if (state.anchor > 0 || state.offset > 0) {
+                    statusEl.innerHTML = `<strong style="color:#f6e58d;">ANCHOR ACTIVE</strong><br>Math ignores old messages.<br>Starting Count: ${state.offset}`;
+                } else {
+                    statusEl.innerHTML = "Pure Auto-Math Active.";
+                    statusEl.style.color = "#666";
+                }
+            } else {
+                statusEl.innerHTML = "Pure Auto-Math Active.";
+                statusEl.style.color = "#666";
+            }
+        });
+
+        window.sendCustomReply = function() {
+            const msg = chatInput.value.trim();
+            if (msg !== "") { 
+                let payload = { sender: 'Mohamed', text: msg, status: 'Delivered', timestamp: serverTimestamp(), msgType: 'love' };
+                if (window.replyingTo) {
+                    payload.replyTo = window.replyingTo;
+                    window.cancelReply();
+                }
+                push(ref(db, 'messages'), payload);
+                chatInput.value = ""; 
+                set(ref(db, 'settings/typing/mohamed'), false);
+            }
+        };
+
+        window.sendQuickNote = function(msg, type) {
+            push(ref(db, 'messages'), { sender: 'Mohamed', text: msg, status: 'Delivered', timestamp: serverTimestamp(), msgType: type });
+            forceMood(type);
+        };
+
+        chatInput.addEventListener("keypress", function(e) { if (e.key === "Enter") window.sendCustomReply(); });
+
+        window.forceMood = function(mood) { push(ref(db, 'aura'), { state: mood }); };
+
+        window.setManualStreak = function() {
+            const val = document.getElementById('streak-val').value;
+            if (val === "") return;
+            set(ref(db, 'settings/streakState'), { anchor: Date.now(), offset: parseInt(val) });
+            document.getElementById('streak-val').value = '';
+        };
+
+        window.resetStreakZero = function() {
+            if (confirm("WARNING: Force streak to 0? New messages will start at 1.")) {
+                set(ref(db, 'settings/streakState'), { anchor: Date.now(), offset: 0 });
+            }
+        };
+
+        window.restoreAutoStreak = function() {
+            remove(ref(db, 'settings/streakState'));
+        };
+
+        window.triggerRemoteLock = function() {
+            set(ref(db, 'settings/remoteLock'), true);
+            setTimeout(() => { set(ref(db, 'settings/remoteLock'), false); }, 3000);
+        };
+
+        window.wipeTerminal = function() {
+            if (confirm("CRITICAL WARNING: This will permanently delete all chat history. Proceed?")) remove(ref(db, 'messages'));
+        };
+		const logList = document.getElementById('access-log-list');
+        onValue(ref(db, 'security_logs'), (snapshot) => {
+            logList.innerHTML = '';
+            if (snapshot.exists()) {
+                const logs = [];
+                snapshot.forEach(child => logs.push({key: child.key, ...child.val()}));
+                logs.reverse().forEach(log => {
+                    const time = new Date(log.timestamp || Date.now()).toLocaleString();
+                    logList.insertAdjacentHTML('beforeend', `
+                        <div style="border-bottom: 1px solid #1a1a24; padding-bottom: 5px;">
+                            <strong style="color: #4ade80;">${log.ip}</strong><br>
+                            ${log.city}, ${log.country} (${log.provider})<br>
+                            <span style="font-size: 0.7rem; color: #666;">${time}</span>
+                        </div>
+                    `);
+                });
+            } else {
+                logList.innerHTML = 'No access logs found.';
+            }
+        });
+
+        window.clearLogs = function() {
+            if (confirm("Wipe all security logs?")) remove(ref(db, 'security_logs'));
+        };
+
+    </script>
+</body>
+</html>
