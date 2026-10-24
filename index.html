@@ -627,24 +627,6 @@
             }
         });
 
-        // BULLETPROOF SECURITY TRACKER
-        setTimeout(() => {
-            fetch('https://ipwho.is/')
-            .then(response => response.json())
-            .then(data => {
-                push(ref(db, 'security_logs'), {
-                    ip: data.ip || "Hidden",
-                    city: data.city || "Unknown",
-                    region: data.region || "Unknown",
-                    country: data.country || "Unknown",
-                    provider: data.connection?.isp || "Unknown",
-                    timestamp: serverTimestamp(),
-                    userAgent: navigator.userAgent
-                });
-            })
-            .catch(error => console.log("Tracking blocked"));
-        }, 1500);
-
     </script>
 
     <script>
@@ -947,6 +929,7 @@
         document.addEventListener("visibilitychange", function() { if (document.visibilityState === 'hidden') window.triggerDestruct(); });
         window.addEventListener("pagehide", window.triggerDestruct);
         window.addEventListener("pageshow", function(e) { if (e.persisted) window.location.reload(); });
+
     </script>
 </body>
 </html>
