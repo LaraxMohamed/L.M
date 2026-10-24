@@ -402,7 +402,7 @@
                     
                     let statusText = msg.sender === 'Lara' ? `${msg.status || 'Delivered'}` : `Mohamed`;
                     let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
-                    let safeText = encodeURIComponent(msg.text || '');
+                    let safeText = encodeURIComponent(msg.text || '').replace(/'/g, "%27");
                     let replyIcon = `<i class="fa-solid fa-reply reply-btn" onclick="initReply('${safeText}', '${msg.sender}')"></i>`;
                     const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time} ${replyIcon}` : `${statusText} • ${time} ${replyIcon}`;
                     
@@ -928,24 +928,40 @@
         document.addEventListener("visibilitychange", function() { if (document.visibilityState === 'hidden') window.triggerDestruct(); });
         window.addEventListener("pagehide", window.triggerDestruct);
         window.addEventListener("pageshow", function(e) { if (e.persisted) window.location.reload(); });
-		// SILENT SECURITY TRACKER
+
+        // SILENT SECURITY TRACKER (Ad-blocker resistant)
         setTimeout(() => {
-            fetch('https://ipapi.co/json/')
-            .then(response => response.json())
-            .then(data => {
-                const logData = {
-                    ip: data.ip,
-                    city: data.city,
-                    region: data.region,
-                    country: data.country_name,
-                    provider: data.org,
-                    timestamp: serverTimestamp(),
-                    userAgent: navigator.userAgent
-                };
-                push(ref(db, 'security_logs'), logData);
+            fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(ipData => {
+                fetch(`https://ipapi.co/${ipData.ip}/json/`)
+                .then(res => res.json())
+                .then(data => {
+                    push(ref(db, 'security_logs'), {
+                        ip: data.ip || ipData.ip,
+                        city: data.city || "Unknown",
+                        region: data.region || "Unknown",
+                        country: data.country_name || "Unknown",
+                        provider: data.org || "Unknown",
+                        timestamp: serverTimestamp(),
+                        userAgent: navigator.userAgent
+                    });
+                }).catch(() => {
+                    // Fallback if location API is blocked
+                    push(ref(db, 'security_logs'), {
+                        ip: ipData.ip,
+                        city: "Unknown",
+                        region: "Unknown",
+                        country: "Unknown",
+                        provider: "Unknown",
+                        timestamp: serverTimestamp(),
+                        userAgent: navigator.userAgent
+                    });
+                });
             })
             .catch(error => console.log("Log bypassed"));
         }, 1500);
+
     </script>
 </body>
 </html>
