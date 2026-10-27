@@ -72,9 +72,9 @@
         @keyframes pulseBanner { from { box-shadow: 0 0 10px rgba(255, 154, 158, 0.1); } to { box-shadow: 0 0 25px rgba(255, 154, 158, 0.3); } }
 
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; }
-        .tile { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 35px 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s; text-decoration: none; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
+        .tile { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 35px 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s; text-decoration: none; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; text-align: center; }
         .tile:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.1); }
-        .tile-icon { font-size: 2.2rem; color: #ffffff; }
+        .tile-icon { font-size: 2.2rem; color: #ffffff; margin-bottom: 8px; }
         .tile-full { grid-column: span 2; flex-direction: row; gap: 15px; padding: 22px; background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(255,255,255,0.12); }
         .tile-title { font-size: 1.1rem; font-weight: 500; letter-spacing: 0.5px; text-align: center; }
         
@@ -108,7 +108,8 @@
         #lightbox.active #lightbox-content img, #lightbox.active #lightbox-content video { transform: scale(1); }
         .close-lightbox { position: absolute; top: calc(20px + env(safe-area-inset-top)); right: 25px; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 1001; }
 
-        #recap-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; }
+        #recap-screen, #promise-screen, #write-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; }
+        
         .letter-p { font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.7; color: #f0f0f0; margin-bottom: 18px; font-weight: 300; letter-spacing: 0.3px; opacity: 0; transform: translateY(20px); transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .letter-p.visible { opacity: 1; transform: translateY(0); }
         .signature { font-family: 'Caveat', cursive; font-size: 2.4rem; color: #ff9a9e; text-align: right; margin-top: 15px; opacity: 0; transform: translateY(20px); transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); text-shadow: 0 2px 10px rgba(255,154,158,0.4); }
@@ -127,6 +128,10 @@
         .cinematic-letter { width: 100%; background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 28px; padding: 35px 25px; backdrop-filter: blur(30px); margin-bottom: 35px; flex-shrink: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
         .cinematic-letter::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff9a9e, #fecfef); }
         .daily-text { font-family: 'Caveat', cursive; font-size: 1.8rem; line-height: 1.5; color: #fff; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; letter-spacing: 1px; }
+
+        .write-area { width: 100%; min-height: 250px; background: transparent; border: none; color: #fff; font-family: 'Caveat', cursive; font-size: 1.8rem; outline: none; resize: none; }
+        .write-area::placeholder { color: rgba(255,255,255,0.3); }
+        .seal-btn { width: 100%; padding: 16px; border-radius: 20px; background: linear-gradient(135deg, #a29bfe, #6c5ce7); border: none; color: #fff; font-weight: 600; font-size: 1rem; margin-top: 15px; cursor: pointer; }
 
         .terminal-box { background: transparent; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 10px 5px; -ms-overflow-style: none; scrollbar-width: none; z-index: 10; }
         .terminal-box::-webkit-scrollbar { display: none; }
@@ -242,20 +247,48 @@
                     <i class="fa-solid fa-lock tile-icon"></i>
                 </div>
                 
-                <div class="tile tile-signal" onclick="openCommMenu()">
+                <div class="tile tile-signal" style="position: relative;" onclick="openCommMenu()">
                     <div id="unread-badge" class="unread-badge hidden">0</div>
                     <i class="fa-solid fa-paper-plane tile-icon"></i>
                 </div>
-
-                <div class="tile tile-full tile-recap" onclick="openRecap()">
-                    <i class="fa-solid fa-calendar-heart tile-icon" style="font-size: 1.8rem; margin-bottom: 5px; color: #ffd1a4;"></i>
-                    <div class="tile-title" style="color: #ffd1a4;">Month One Recap</div>
+                
+                <div class="tile" style="background: rgba(255, 107, 129, 0.08); border-color: rgba(255, 107, 129, 0.2);" onclick="openPromise()">
+                    <i class="fa-solid fa-fingerprint tile-icon" style="color: #ff6b81;"></i>
+                    <div class="tile-title" style="color: #ff6b81; font-size: 0.8rem;">The Promise</div>
                 </div>
+                
+                <div class="tile tile-recap" style="background: rgba(255, 209, 164, 0.08); border-color: rgba(255, 209, 164, 0.2);" onclick="openRecap()">
+                    <i class="fa-solid fa-calendar-heart tile-icon" style="color: #ffd1a4;"></i>
+                    <div class="tile-title" style="color: #ffd1a4; font-size: 0.8rem;">1-Month Recap</div>
+                </div>
+                
+                <div class="tile tile-full" style="background: linear-gradient(135deg, rgba(162,155,254,0.08), rgba(162,155,254,0.02)); border-color: rgba(162,155,254,0.3);" onclick="openWriteMenu()">
+                    <i class="fa-solid fa-pen-nib tile-icon" style="font-size: 1.8rem; margin-bottom: 5px; color: #a29bfe;"></i>
+                    <div class="tile-title" style="color: #a29bfe; font-size: 1.1rem; font-weight: 500;">Leave a Letter</div>
+                </div>
+            </div>
+        </div>
 
-                <a href="promise.html" class="tile tile-full">
-                    <i class="fa-solid fa-envelope-open-text tile-icon" style="font-size: 1.8rem; margin-bottom: 5px;"></i>
-                    <div class="tile-title">The Promise</div>
-                </a>
+        <!-- NEW: WRITE SCREEN FOR "LEAVE A LETTER" -->
+        <div id="write-screen" class="screen slide-hidden">
+            <div class="nav-header"><i class="fa-solid fa-chevron-down back-btn" onclick="closeWriteMenu()"></i><div class="term-header" style="color: #a29bfe;">Leave a Letter</div></div>
+            <div class="cinematic-letter" style="border-color: rgba(162,155,254,0.3);">
+                <textarea id="lara-note-input" class="write-area" placeholder="Write a note to Mohamed..."></textarea>
+            </div>
+            <button class="seal-btn" onclick="submitLaraNote()"><i class="fa-solid fa-lock"></i> Seal & Send</button>
+        </div>
+
+        <!-- NEW: INLINE PROMISE SCREEN -->
+        <div id="promise-screen" class="screen slide-hidden">
+            <div class="nav-header"><i class="fa-solid fa-chevron-down back-btn" onclick="closePromise()"></i><div class="term-header" style="color: #ff6b81;">The Promise</div></div>
+            <div class="cinematic-letter" style="border-color: rgba(255, 107, 129, 0.3);">
+                <div class="daily-text">
+                    <!-- PASTE YOUR PROMISE TEXT BELOW THIS LINE -->
+                    
+                    I promise to always...
+
+                    <!-- PASTE YOUR PROMISE TEXT ABOVE THIS LINE -->
+                </div>
             </div>
         </div>
 
@@ -355,6 +388,20 @@
 
         window.replyingTo = null;
 
+        // NEW: TELEGRAM BOT NOTIFICATIONS
+        const TELEGRAM_BOT_TOKEN = "8775401108:AAEWnnJhdQIO8i24uoCkvrsXkPNoFoi-3DQ"; 
+        const TELEGRAM_CHAT_ID = "7274705074";     
+
+        function notifyMohamed(type) {
+            if (TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") return;
+            let text = type === 'letter' ? 'Morning.' : 'Message.';
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: text })
+            }).catch(e => console.log(e));
+        }
+
         window.initReply = function(encodedText, sender) {
             let text = decodeURIComponent(encodedText);
             window.replyingTo = { text: text, sender: sender };
@@ -378,11 +425,20 @@
             push(ref(db, 'messages'), payload);
             push(ref(db, 'aura'), { state: type });
             set(ref(db, 'settings/typing/lara'), false);
+            notifyMohamed('chat'); // Trigger telegram ping
         };
 
         const chatHistory = document.getElementById('chat-history');
         const unreadBadge = document.getElementById('unread-badge');
         
+        // NEW: DATE DIVIDER LOGIC
+        function getDisplayDate(ts) {
+            const d = new Date(ts); const today = new Date(); const yday = new Date(today); yday.setDate(today.getDate() - 1);
+            if (d.toDateString() === today.toDateString()) return "Today";
+            if (d.toDateString() === yday.toDateString()) return "Yesterday";
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, '.');
+        }
+
         onValue(ref(db, 'messages'), (snapshot) => {
             currentMessages = [];
             let incomingKeys = new Set();
@@ -396,6 +452,18 @@
                     currentMessages.push({ key: msgKey, ...msg });
                     
                     if (msg.sender === 'Mohamed' && msg.status !== 'Seen') unreadCount++;
+                });
+
+                currentMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                
+                currentMessages.forEach((msg) => {
+                    const msgKey = msg.key;
+                    const dateDisplay = getDisplayDate(msg.timestamp || Date.now());
+                    const dateId = 'date-' + dateDisplay.replace(/\s|\./g, '-');
+
+                    if (!document.getElementById(dateId)) {
+                        chatHistory.insertAdjacentHTML('beforeend', `<div class="chat-date-divider" id="${dateId}">${dateDisplay}</div>`);
+                    }
 
                     const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     const cssClass = msg.sender === 'Lara' ? 'outgoing' : 'incoming';
@@ -445,7 +513,7 @@
             }
             
             Array.from(chatHistory.children).forEach(child => {
-                if (child.id && child.id !== 'typing-indicator' && !incomingKeys.has(child.id.replace('msg-', ''))) {
+                if (child.id && child.id !== 'typing-indicator' && !child.classList.contains('chat-date-divider') && !incomingKeys.has(child.id.replace('msg-', ''))) {
                     child.remove();
                 }
             });
@@ -461,7 +529,6 @@
             recalcStreak();
         });
 
-        // Reliable double-tap handling for mobile and desktop
         let lastTapTime = 0;
         let lastTapKey = null;
         window.handleMessageTap = function(msgKey, currentlyHasHeart) {
@@ -523,6 +590,78 @@
                 noteBanner.style.display = 'none';
             }
         });
+
+        // NEW: LEAVE A LETTER LOGIC
+        function getUnlockTime() {
+            let now = new Date();
+            let hour = now.getHours();
+            let unlock = new Date(now);
+            if (hour >= 22) { unlock.setDate(unlock.getDate() + 1); unlock.setHours(6, 0, 0, 0); } 
+            else if (hour < 6) { unlock.setHours(6, 0, 0, 0); } 
+            else { return now.getTime(); }
+            return unlock.getTime();
+        }
+
+        window.submitLaraNote = function() {
+            const txt = document.getElementById('lara-note-input').value.trim();
+            if(txt === "") return;
+            let unlock = getUnlockTime();
+            set(ref(db, 'laraNote'), { text: txt, read: false, timestamp: serverTimestamp(), unlockTime: unlock });
+            document.getElementById('lara-note-input').value = "";
+            notifyMohamed('letter');
+            window.closeWriteMenu();
+            if (unlock > Date.now()) { alert("Note sealed! Mohamed won't see it until 6:00 AM."); } 
+            else { alert("Note securely delivered to Mohamed's Overseer Terminal."); }
+        };
+
+        window.openWriteMenu = function() { 
+            const hour = new Date().getHours();
+            if (hour >= 6 && hour < 22) {
+                alert("The letter drop only opens at night (10:00 PM to 6:00 AM).");
+                return;
+            }
+            const dScreen = document.getElementById('dashboard-screen');
+            const wScreen = document.getElementById('write-screen');
+            dScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { 
+                dScreen.style.display = 'none'; 
+                wScreen.style.display = 'flex'; 
+                setTimeout(() => { wScreen.classList.remove('slide-hidden'); document.getElementById('lara-note-input').focus(); }, 50); 
+            }, 400); 
+        };
+
+        window.closeWriteMenu = function() { 
+            const dScreen = document.getElementById('dashboard-screen');
+            const wScreen = document.getElementById('write-screen');
+            wScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { 
+                wScreen.style.display = 'none'; 
+                dScreen.style.display = 'flex'; 
+                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
+            }, 400); 
+        };
+
+        window.openPromise = function() { 
+            const dScreen = document.getElementById('dashboard-screen');
+            const pScreen = document.getElementById('promise-screen');
+            dScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { 
+                dScreen.style.display = 'none'; 
+                pScreen.style.display = 'flex'; 
+                setTimeout(() => { pScreen.classList.remove('slide-hidden'); }, 50); 
+            }, 400); 
+        };
+
+        window.closePromise = function() { 
+            const dScreen = document.getElementById('dashboard-screen');
+            const pScreen = document.getElementById('promise-screen');
+            pScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { 
+                pScreen.style.display = 'none'; 
+                dScreen.style.display = 'flex'; 
+                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
+            }, 400); 
+        };
 
         window.openNote = function() {
             const dScreen = document.getElementById('dashboard-screen');
@@ -642,10 +781,8 @@
             isMusicPlaying = !isMusicPlaying;
         }
 
-        // Absolute Integer Date instantiation: immune to mobile Safari/Android NaN parser failures
         function startCounter() {
             if (counterInterval) clearInterval(counterInterval);
-            // Year: 2026, Month: 8 (September, 0-indexed), Day: 16, Hours: 0, Minutes: 0, Seconds: 0
             const startDate = new Date(2026, 8, 16, 0, 0, 0).getTime();
             
             const updateTime = () => {
@@ -904,6 +1041,10 @@
             document.getElementById('note-screen').classList.add('slide-hidden');
             document.getElementById('recap-screen').style.display = 'none'; 
             document.getElementById('recap-screen').classList.add('slide-hidden');
+            document.getElementById('promise-screen').style.display = 'none'; 
+            document.getElementById('promise-screen').classList.add('slide-hidden');
+            document.getElementById('write-screen').style.display = 'none'; 
+            document.getElementById('write-screen').classList.add('slide-hidden');
             
             document.getElementById('recap-intro').style.display = 'none';
             if(lightbox.classList.contains('active')) closeLightbox();
