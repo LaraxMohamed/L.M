@@ -209,7 +209,7 @@
         .envelope-wrapper.open .seal { opacity: 0; }
         .envelope-wrapper.open .letter-insert { transform: translateY(-130px); }
 
-        #scrapbook-scene { display: none; opacity: 0; width: 100%; min-height: 100vh; padding: calc(60px + env(safe-area-inset-top)) 20px 60px 20px; transition: opacity 1.5s ease; }
+        #scrapbook-scene { display: none; opacity: 0; width: 100%; padding: calc(30px + env(safe-area-inset-top)) 20px 60px 20px; transition: opacity 1.5s ease; }
         .scrapbook-container { display: flex; flex-direction: column-reverse; flex-wrap: wrap; gap: 40px; max-width: 1100px; margin: 0 auto; justify-content: center; align-items: center; }
         
         .film-strip { background-color: #0a0a0a; width: 100%; max-width: 340px; padding: 20px 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); background-image: repeating-linear-gradient(to bottom, #fff 0, #fff 10px, transparent 10px, transparent 20px), repeating-linear-gradient(to bottom, #fff 0, #fff 10px, transparent 10px, transparent 20px); background-size: 8px 100%, 8px 100%; background-position: 5px 0, calc(100% - 5px) 0; background-repeat: no-repeat; }
@@ -273,7 +273,7 @@
 
             <div id="morning-note-banner" class="note-banner" onclick="openNote()">
                 <i id="note-icon" class="fa-solid fa-envelope"></i>
-                <span id="note-title">Morning Letter waiting for you...</span>
+                <span id="note-title">Morning Letter</span>
             </div>
 
             <div class="grid-container">
@@ -451,6 +451,7 @@
         let currentMessages = [];
         let streakAnchor = 0;
         let streakOffset = 0;
+        let morningNoteData = null;
 
         window.replyingTo = null;
 
@@ -619,35 +620,35 @@
         // --- SYNC WITH ADMIN TOOLS FOR MORNING LETTER ---
         onValue(ref(db, 'morningNote'), (snapshot) => {
             if(snapshot.exists()) {
-                const data = snapshot.val();
-                const now = Date.now();
-                
-                // If admin set an unlockTime, respect it
-                if (data.unlockTime && now < data.unlockTime) {
-                    noteBanner.style.display = 'none';
-                    return;
-                }
-
-                if(data.text !== "") {
-                    noteBanner.style.display = 'flex';
-                    noteContent.innerText = data.text;
-                    
-                    if (data.read) {
-                        noteBanner.classList.add('read');
-                        document.getElementById('note-title').innerText = "Morning Letter (Read)";
-                        document.getElementById('note-icon').className = "fa-solid fa-envelope-open-text";
-                    } else {
-                        noteBanner.classList.remove('read');
-                        document.getElementById('note-title').innerText = "Morning Letter waiting for you...";
-                        document.getElementById('note-icon').className = "fa-solid fa-envelope";
-                    }
-                } else {
-                    noteBanner.style.display = 'none';
-                }
+                morningNoteData = snapshot.val();
+                updateMorningBannerState();
             } else {
+                morningNoteData = null;
                 noteBanner.style.display = 'none';
             }
         });
+
+        function updateMorningBannerState() {
+            if (!morningNoteData || !morningNoteData.text) {
+                noteBanner.style.display = 'none';
+                return;
+            }
+
+            noteBanner.style.display = 'flex';
+            noteBanner.classList.remove('read');
+
+            if (morningNoteData.read) {
+                noteBanner.classList.add('read');
+                document.getElementById('note-title').innerText = "Morning Letter (Read)";
+                document.getElementById('note-icon').className = "fa-solid fa-envelope-open-text";
+            } else {
+                document.getElementById('note-title').innerText = "Morning Letter";
+                document.getElementById('note-icon').className = "fa-solid fa-envelope";
+            }
+        }
+
+        // Check every minute if the letter has unlocked while the app is open
+        setInterval(updateMorningBannerState, 60000);
 
         function getUnlockTime() {
             let now = new Date();
@@ -655,7 +656,7 @@
             let unlock = new Date(now);
             if (hour >= 22) { unlock.setDate(unlock.getDate() + 1); unlock.setHours(6, 0, 0, 0); } 
             else if (hour < 6) { unlock.setHours(6, 0, 0, 0); } 
-            else { return now.getTime(); } // Should not happen due to block, but safe fallback
+            else { return now.getTime(); } 
             return unlock.getTime();
         }
 
@@ -663,7 +664,6 @@
             const txt = document.getElementById('lara-note-input').value.trim();
             if(txt === "") return;
             
-            // Lara can ONLY write between 10 PM and 6 AM.
             let unlock = getUnlockTime();
             
             set(ref(db, 'laraNote'), { 
@@ -686,7 +686,6 @@
 
         window.openWriteMenu = function() { 
             const hour = new Date().getHours();
-            // 10 PM to 6 AM
             if (hour >= 6 && hour < 22) {
                 alert("The letter drop only opens at night (10:00 PM to 6:00 AM).");
                 return;
@@ -753,7 +752,6 @@
                 dScreen.style.display = 'flex'; 
                 setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
                 
-                // Reset animation state so it can be opened again
                 setTimeout(() => {
                     document.getElementById("the-envelope").classList.remove("open");
                     document.querySelector(".open-text").style.display = "block";
@@ -767,6 +765,11 @@
         };
 
         window.openNote = function() {
+            if (morningNoteData && morningNoteData.unlockTime && Date.now() < morningNoteData.unlockTime) {
+                alert("This letter is encrypted and will unlock at 6:00 AM.");
+                return;
+            }
+
             const dScreen = document.getElementById('dashboard-screen');
             const nScreen = document.getElementById('note-screen');
             dScreen.classList.add('slide-hidden'); 
