@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="icon.png">
     
     <title>16.09</title>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -108,7 +108,7 @@
         #lightbox.active #lightbox-content img, #lightbox.active #lightbox-content video { transform: scale(1); }
         .close-lightbox { position: absolute; top: calc(20px + env(safe-area-inset-top)); right: 25px; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 1001; }
 
-        #recap-screen, #promise-screen, #write-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; }
+        #recap-screen, #write-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; }
         
         .letter-p { font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.7; color: #f0f0f0; margin-bottom: 18px; font-weight: 300; letter-spacing: 0.3px; opacity: 0; transform: translateY(20px); transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .letter-p.visible { opacity: 1; transform: translateY(0); }
@@ -135,6 +135,8 @@
 
         .terminal-box { background: transparent; width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 10px 5px; -ms-overflow-style: none; scrollbar-width: none; z-index: 10; }
         .terminal-box::-webkit-scrollbar { display: none; }
+        .chat-date-divider { width: 100%; text-align: center; font-size: 0.75rem; color: #777; margin: 15px 0 5px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
+
         .msg { display: flex; flex-direction: column; width: 100%; animation: floatIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(15px) translateZ(0); transform-origin: bottom center; will-change: transform, opacity; position: relative; }
         @keyframes floatIn { to { opacity: 1; transform: translateY(0) translateZ(0); } }
         .msg.incoming { align-items: flex-start; }
@@ -185,6 +187,38 @@
         
         .tap-particle { position: absolute; pointer-events: none; animation: burstUp 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 100; text-shadow: 0 5px 15px rgba(0,0,0,0.3); will-change: transform, opacity; }
         @keyframes burstUp { 0% { opacity: 1; transform: translateY(0) scale(0.5) rotate(0deg) translateZ(0); } 100% { opacity: 0; transform: translateY(-120px) scale(1.5) rotate(25deg) translateZ(0); } }
+
+        /* --- EXACT PROMISE CSS --- */
+        #promise-screen { background-color: #2b0810; overflow-y: auto; overflow-x: hidden; padding: 0; justify-content: flex-start; align-items: center; }
+        
+        #envelope-scene { display: flex; position: relative; width: 100%; height: 100vh; flex-direction: column; align-items: center; justify-content: center; opacity: 1; transition: opacity 1s ease; }
+        .top-text { position: absolute; top: 15%; font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; letter-spacing: 1px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: opacity 0.3s; }
+        .open-text { position: absolute; top: 28%; font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 400; color: #d4af37; letter-spacing: 1.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.6); animation: breathe 3s infinite ease-in-out; transition: opacity 0.3s; }
+        @keyframes breathe { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.02); text-shadow: 0 2px 15px rgba(212,175,55,0.4); } }
+        
+        .envelope-wrapper { position: absolute; top: 45%; width: 340px; height: 220px; cursor: pointer; perspective: 1000px; transform: scale(0.9); }
+        .envelope-back { position: absolute; width: 100%; height: 100%; background: #360911; border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .letter-insert { position: absolute; bottom: 0; left: 10px; width: 320px; height: 200px; background: #f0ebd8; border-radius: 8px; z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s; }
+        .envelope-front { position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #661625 0%, #4a0f19 100%); border-radius: 4px; clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%); z-index: 3; box-shadow: inset 0 0 20px rgba(0,0,0,0.3); }
+        .flap-container { position: absolute; top: 0; left: 0; width: 100%; height: 130px; transform-origin: top; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.4s; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4)); }
+        .flap { width: 100%; height: 100%; background: linear-gradient(to bottom, #751a2b 0%, #5c1422 100%); clip-path: polygon(0 0, 100% 0, 50% 100%); position: relative; }
+        .seal { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 55px; height: 55px; background: radial-gradient(circle at 30% 30%, #f4d068 0%, #c4962b 40%, #8a6210 80%, #4a3000 100%); border-radius: 50%; box-shadow: inset 0 0 5px rgba(255,255,255,0.4), inset 0 -3px 8px rgba(0,0,0,0.6), 0 4px 10px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 6; transition: opacity 0.3s 0.1s; }
+        .seal::after { content: '♥'; font-size: 26px; color: #5c3c00; text-shadow: 1px 1px 1px rgba(255,255,255,0.3), -1px -1px 2px rgba(0,0,0,0.8); transform: scaleY(0.9); }
+        
+        .envelope-wrapper.open .flap-container { transform: rotateX(180deg); z-index: 1; }
+        .envelope-wrapper.open .seal { opacity: 0; }
+        .envelope-wrapper.open .letter-insert { transform: translateY(-130px); }
+
+        #scrapbook-scene { display: none; opacity: 0; width: 100%; min-height: 100vh; padding: calc(60px + env(safe-area-inset-top)) 20px 60px 20px; transition: opacity 1.5s ease; }
+        .scrapbook-container { display: flex; flex-direction: column-reverse; flex-wrap: wrap; gap: 40px; max-width: 1100px; margin: 0 auto; justify-content: center; align-items: center; }
+        
+        .film-strip { background-color: #0a0a0a; width: 100%; max-width: 340px; padding: 20px 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); background-image: repeating-linear-gradient(to bottom, #fff 0, #fff 10px, transparent 10px, transparent 20px), repeating-linear-gradient(to bottom, #fff 0, #fff 10px, transparent 10px, transparent 20px); background-size: 8px 100%, 8px 100%; background-position: 5px 0, calc(100% - 5px) 0; background-repeat: no-repeat; }
+        .film-strip img, .film-strip video { width: 100%; height: auto; border-radius: 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover; }
+        
+        .torn-paper { background: #f0ebd8; color: #2c2c2c; width: 100%; max-width: 500px; padding: 60px 30px 40px 30px; position: relative; box-shadow: 0 15px 30px rgba(0,0,0,0.5); border-radius: 8px; direction: rtl; text-align: right; }
+        .red-wax-seal { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; background: radial-gradient(circle at 30% 30%, #b81d2f 0%, #7d101d 50%, #40050c 100%); border-radius: 50%; box-shadow: inset 0 -2px 6px rgba(0,0,0,0.5), 0 5px 10px rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; font-size: 28px; color: #290207; text-shadow: 1px 1px 1px rgba(255,255,255,0.2), -1px -1px 2px rgba(0,0,0,0.6); z-index: 10; }
+        .torn-paper h2 { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 26px; text-align: center; border-bottom: 2px solid rgba(90, 10, 16, 0.3); padding-bottom: 15px; margin-bottom: 30px; color: #5a0a10; direction: ltr; }
+        .torn-paper p { font-family: 'Cairo', sans-serif; font-size: 16px; line-height: 1.9; margin-bottom: 20px; font-weight: 600; color: #333; }
     </style>
 </head>
 <body id="app-body">
@@ -253,7 +287,7 @@
                 </div>
                 
                 <div class="tile" style="background: rgba(255, 107, 129, 0.08); border-color: rgba(255, 107, 129, 0.2);" onclick="openPromise()">
-                    <i class="fa-solid fa-fingerprint tile-icon" style="color: #ff6b81;"></i>
+                    <i class="fa-solid fa-heart tile-icon" style="color: #ff6b81;"></i>
                     <div class="tile-title" style="color: #ff6b81; font-size: 0.8rem;">The Promise</div>
                 </div>
                 
@@ -269,7 +303,6 @@
             </div>
         </div>
 
-        <!-- NEW: WRITE SCREEN FOR "LEAVE A LETTER" -->
         <div id="write-screen" class="screen slide-hidden">
             <div class="nav-header"><i class="fa-solid fa-chevron-down back-btn" onclick="closeWriteMenu()"></i><div class="term-header" style="color: #a29bfe;">Leave a Letter</div></div>
             <div class="cinematic-letter" style="border-color: rgba(162,155,254,0.3);">
@@ -278,16 +311,47 @@
             <button class="seal-btn" onclick="submitLaraNote()"><i class="fa-solid fa-lock"></i> Seal & Send</button>
         </div>
 
-        <!-- NEW: INLINE PROMISE SCREEN -->
+        <!-- INTEGRATED EXACT PROMISE SCREEN -->
         <div id="promise-screen" class="screen slide-hidden">
-            <div class="nav-header"><i class="fa-solid fa-chevron-down back-btn" onclick="closePromise()"></i><div class="term-header" style="color: #ff6b81;">The Promise</div></div>
-            <div class="cinematic-letter" style="border-color: rgba(255, 107, 129, 0.3);">
-                <div class="daily-text">
-                    <!-- PASTE YOUR PROMISE TEXT BELOW THIS LINE -->
-                    
-                    I promise to always...
+            <i class="fa-solid fa-chevron-left" onclick="closePromise()" style="position: absolute; top: calc(20px + env(safe-area-inset-top)); left: 20px; z-index: 9999; color: #fff; font-size: 1.5rem; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+            
+            <!-- STAGE 1: REALISTIC ENVELOPE -->
+            <div id="envelope-scene">
+                <div class="top-text">A Promise To You 🤍</div>
+                <div class="open-text">Open it</div>
+                
+                <div class="envelope-wrapper" id="the-envelope" onclick="openEnvelope()">
+                    <div class="envelope-back"></div>
+                    <div class="letter-insert"></div>
+                    <div class="envelope-front"></div>
+                    <div class="flap-container">
+                        <div class="flap"></div>
+                        <div class="seal"></div>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- PASTE YOUR PROMISE TEXT ABOVE THIS LINE -->
+            <!-- STAGE 2: THE SCRAPBOOK REVEAL -->
+            <div id="scrapbook-scene">
+                <div class="scrapbook-container">
+                    
+                    <div class="film-strip">
+                        <!-- Corrected to use exact GitHub repo files -->
+                        <img src="photo1.jpg" alt="Night Photo">
+                        <video autoplay loop muted playsinline>
+                            <source src="video1.mp4" type="video/mp4">
+                        </video>
+                        <img src="photo2.jpg" alt="Morning Photo">
+                    </div>
+
+                    <div class="torn-paper">
+                        <div class="red-wax-seal">♥</div>
+                        <h2>A Promise To Lara</h2>
+                        <p>وعد يحبيبتي اني هفضل جمبك دايماً ومش هبعد عنك ابداً يا لارا، انا بحبك من زمان اوي وفرحان جداً اننا بقينا مع بعض أخيراً فا بجد عمري ما هقبل انك تبعدي عني او اني اخسرك ابداً يحبيبتي.</p>
+                        <p>وعد يلارا اني اي مره اضايقك فيها هاجي اصالحك مره واتنين وتلاته و عشرة لحد ما نتصالح ونبقى احلى مالاول كمان عشان انا مقدرش على زعلك يحبيبتي ولا اني اسيبك زعلانه مني انا بجد بحبك اوي، مقدرش اوعدك اني مش هيطلع مني حاجة تضايقك خالص، مفيش حد مبيغلطش، بس اقدر اوعدك اني لو غلطت هاجي اصلح غلطي اكيد.</p>
+                        <p>وعد يروحي اني هعمل كل الي اقدر عليه عشان اكون في احسن صورة قدام عيلتك ويكونوا راضيين بيا وشايفين اني شخص كويس فعلاً ويوافقوا اني اكون مع لارا وهما متطمنين انها مع حد هيعاملها كويس و هيخاف عليها بجد.</p>
+                        <p>لارا انا بموت فيكي يحبيبتي ربنا يخليكي ليا وميبعدكيش عني ابداً عشان انا بجد ماليش غيرك ومش عايز ابقى مع اي حد غيرك يحبيبتي❤️</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -320,15 +384,17 @@
 
             <div class="photo-gallery-title">The Archives</div>
             <div class="polaroid-scroll">
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo1.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';"><div class="polaroid-caption">Where it started</div></div>
-                <div class="polaroid" onclick="openLightbox(this)"><video src="video1.mp4" autoplay loop muted playsinline onerror="this.style.display='none';"></video><div class="polaroid-caption">My favorite smile</div></div>
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo2.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop';"></div>
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo3.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1584284168016-56efd5598687?q=80&w=600&auto=format&fit=crop';"></div>
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo4.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';"></div>
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo5.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop';"></div>
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo6.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop';"></div>
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo7.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1584284168016-56efd5598687?q=80&w=600&auto=format&fit=crop';"></div>
-                <div class="polaroid" onclick="openLightbox(this)"><img src="photo8.jpg" alt="Memory" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop';"></div>
+                <!-- Corrected Gallery: Exact GitHub Files -->
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo1.jpg" alt="Memory"><div class="polaroid-caption">Where it started</div></div>
+                <div class="polaroid" onclick="openLightbox(this)"><video src="video1.mp4" autoplay loop muted playsinline></video><div class="polaroid-caption">My favorite smile</div></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo2.jpg" alt="Memory"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo3.jpg" alt="Memory"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo4.jpg" alt="Memory"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo5.jpg" alt="Memory"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo6.jpg" alt="Memory"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo7.jpg" alt="Memory"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo8.jpg" alt="Memory"></div>
+                <div class="polaroid" onclick="openLightbox(this)"><img src="photo12.jpg" alt="Memory"><div class="polaroid-caption">Bonus Memory</div></div>
             </div>
         </div>
 
@@ -388,7 +454,6 @@
 
         window.replyingTo = null;
 
-        // NEW: TELEGRAM BOT NOTIFICATIONS
         const TELEGRAM_BOT_TOKEN = "8775401108:AAEWnnJhdQIO8i24uoCkvrsXkPNoFoi-3DQ"; 
         const TELEGRAM_CHAT_ID = "7274705074";     
 
@@ -425,14 +490,14 @@
             push(ref(db, 'messages'), payload);
             push(ref(db, 'aura'), { state: type });
             set(ref(db, 'settings/typing/lara'), false);
-            notifyMohamed('chat'); // Trigger telegram ping
+            notifyMohamed('chat'); 
         };
 
         const chatHistory = document.getElementById('chat-history');
         const unreadBadge = document.getElementById('unread-badge');
         
-        // NEW: DATE DIVIDER LOGIC
         function getDisplayDate(ts) {
+            if (!ts) return "Today";
             const d = new Date(ts); const today = new Date(); const yday = new Date(today); yday.setDate(today.getDate() - 1);
             if (d.toDateString() === today.toDateString()) return "Today";
             if (d.toDateString() === yday.toDateString()) return "Yesterday";
@@ -441,82 +506,59 @@
 
         onValue(ref(db, 'messages'), (snapshot) => {
             currentMessages = [];
-            let incomingKeys = new Set();
             let unreadCount = 0;
             
             if(snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
                     const msg = childSnapshot.val();
-                    const msgKey = childSnapshot.key;
-                    incomingKeys.add(msgKey);
-                    currentMessages.push({ key: msgKey, ...msg });
-                    
+                    currentMessages.push({ key: childSnapshot.key, ...msg });
                     if (msg.sender === 'Mohamed' && msg.status !== 'Seen') unreadCount++;
-                });
-
-                currentMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                
-                currentMessages.forEach((msg) => {
-                    const msgKey = msg.key;
-                    const dateDisplay = getDisplayDate(msg.timestamp || Date.now());
-                    const dateId = 'date-' + dateDisplay.replace(/\s|\./g, '-');
-
-                    if (!document.getElementById(dateId)) {
-                        chatHistory.insertAdjacentHTML('beforeend', `<div class="chat-date-divider" id="${dateId}">${dateDisplay}</div>`);
-                    }
-
-                    const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    const cssClass = msg.sender === 'Lara' ? 'outgoing' : 'incoming';
-                    
-                    let statusText = msg.sender === 'Lara' ? `${msg.status || 'Delivered'}` : `Mohamed`;
-                    let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
-                    let safeText = encodeURIComponent(msg.text || '').replace(/'/g, "%27");
-                    let replyIcon = `<i class="fa-solid fa-reply reply-btn" onclick="initReply('${safeText}', '${msg.sender}')"></i>`;
-                    const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time} ${replyIcon}` : `${statusText} • ${time} ${replyIcon}`;
-                    
-                    let reactionHtml = msg.reaction ? `<div class="reaction-badge">${msg.reaction}</div>` : '';
-                    let hasHeartStr = msg.reaction ? 'true' : 'false';
-                    let replyBlockHtml = msg.replyTo ? `<div class="quoted-msg"><span class="quoted-sender">${msg.replyTo.sender}</span><span>${msg.replyTo.text}</span></div>` : '';
-
-                    const existingMsg = document.getElementById('msg-' + msgKey);
-                    if (existingMsg) {
-                        const statusDiv = existingMsg.querySelector('.msg-status');
-                        if (statusDiv.innerHTML !== statusHtml) statusDiv.innerHTML = statusHtml;
-                        
-                        let existingReact = existingMsg.querySelector('.reaction-badge');
-                        if (msg.reaction && !existingReact) {
-                            existingMsg.querySelector('.msg-bubble').insertAdjacentHTML('beforeend', reactionHtml);
-                        } else if (!msg.reaction && existingReact) {
-                            existingReact.remove();
-                        }
-                        
-                        existingMsg.querySelector('.msg-bubble').onclick = () => window.handleMessageTap(msgKey, hasHeartStr === 'true');
-                    } else {
-                        const htmlStr = `
-                            <div class="msg ${cssClass}" id="msg-${msgKey}">
-                                <div class="msg-bubble" id="bubble-${msgKey}">
-                                    ${replyBlockHtml}
-                                    ${msg.text}
-                                    ${reactionHtml}
-                                </div>
-                                <div class="msg-status">${statusHtml}</div>
-                            </div>
-                        `;
-                        chatHistory.insertAdjacentHTML('beforeend', htmlStr);
-                        const newBubble = document.getElementById('bubble-' + msgKey);
-                        if (newBubble) {
-                            newBubble.onclick = () => window.handleMessageTap(msgKey, hasHeartStr === 'true');
-                        }
-                        setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 10);
-                    }
                 });
             }
             
-            Array.from(chatHistory.children).forEach(child => {
-                if (child.id && child.id !== 'typing-indicator' && !child.classList.contains('chat-date-divider') && !incomingKeys.has(child.id.replace('msg-', ''))) {
-                    child.remove();
+            currentMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+            
+            let renderHTML = '';
+            let currentDateStr = '';
+
+            currentMessages.forEach((msg) => {
+                const msgDate = getDisplayDate(msg.timestamp);
+                if (msgDate !== currentDateStr) {
+                    renderHTML += `<div class="chat-date-divider">${msgDate}</div>`;
+                    currentDateStr = msgDate;
                 }
+
+                const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Sending...';
+                const cssClass = msg.sender === 'Lara' ? 'outgoing' : 'incoming';
+                
+                let statusText = msg.sender === 'Lara' ? `${msg.status || 'Delivered'}` : `Mohamed`;
+                let dotColor = (msg.status === 'Seen') ? '#3b82f6' : '#4ade80';
+                let safeText = encodeURIComponent(msg.text || '').replace(/'/g, "%27");
+                let replyIcon = `<i class="fa-solid fa-reply reply-btn" onclick="initReply('${safeText}', '${msg.sender}')"></i>`;
+                const statusHtml = msg.sender === 'Lara' ? `<div class="status-dot" style="background:${dotColor}"></div> ${statusText} • ${time} ${replyIcon}` : `${statusText} • ${time} ${replyIcon}`;
+                
+                let reactionHtml = msg.reaction ? `<div class="reaction-badge">${msg.reaction}</div>` : '';
+                let hasHeartStr = msg.reaction ? 'true' : 'false';
+                let replyBlockHtml = msg.replyTo ? `<div class="quoted-msg"><span class="quoted-sender">${msg.replyTo.sender}</span><span>${msg.replyTo.text}</span></div>` : '';
+
+                renderHTML += `
+                    <div class="msg ${cssClass}" id="msg-${msg.key}">
+                        <div class="msg-bubble" onclick="window.handleMessageTap('${msg.key}', ${hasHeartStr})">
+                            ${replyBlockHtml}
+                            ${msg.text}
+                            ${reactionHtml}
+                        </div>
+                        <div class="msg-status">${statusHtml}</div>
+                    </div>
+                `;
             });
+            
+            const typingHTML = document.getElementById('typing-indicator').outerHTML;
+            chatHistory.innerHTML = renderHTML + typingHTML;
+            
+            window.activeTypingIndicator = document.getElementById('typing-indicator');
+            
+            setTimeout(() => { chatHistory.scrollTop = chatHistory.scrollHeight; }, 10);
 
             if (unreadCount > 0 && !window.isChatOpen) {
                 unreadBadge.innerText = unreadCount;
@@ -551,13 +593,15 @@
             }
         };
 
-        const typingIndicator = document.getElementById('typing-indicator');
         onValue(ref(db, 'settings/typing/mohamed'), (snapshot) => {
-            if (snapshot.exists() && snapshot.val() === true) {
-                typingIndicator.classList.remove('hidden');
-                setTimeout(() => chatHistory.scrollTop = chatHistory.scrollHeight, 10);
-            } else {
-                typingIndicator.classList.add('hidden');
+            const typingIndicator = document.getElementById('typing-indicator') || window.activeTypingIndicator;
+            if (typingIndicator) {
+                if (snapshot.exists() && snapshot.val() === true) {
+                    typingIndicator.classList.remove('hidden');
+                    setTimeout(() => chatHistory.scrollTop = chatHistory.scrollHeight, 10);
+                } else {
+                    typingIndicator.classList.add('hidden');
+                }
             }
         });
 
@@ -572,50 +616,77 @@
         const noteBanner = document.getElementById('morning-note-banner');
         const noteContent = document.getElementById('daily-note-content');
         
+        // --- SYNC WITH ADMIN TOOLS FOR MORNING LETTER ---
         onValue(ref(db, 'morningNote'), (snapshot) => {
-            if(snapshot.exists() && snapshot.val().text !== "") {
-                noteBanner.style.display = 'flex';
-                noteContent.innerText = snapshot.val().text;
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                const now = Date.now();
                 
-                if (snapshot.val().read) {
-                    noteBanner.classList.add('read');
-                    document.getElementById('note-title').innerText = "Morning Letter (Read)";
-                    document.getElementById('note-icon').className = "fa-solid fa-envelope-open-text";
+                // If admin set an unlockTime, respect it
+                if (data.unlockTime && now < data.unlockTime) {
+                    noteBanner.style.display = 'none';
+                    return;
+                }
+
+                if(data.text !== "") {
+                    noteBanner.style.display = 'flex';
+                    noteContent.innerText = data.text;
+                    
+                    if (data.read) {
+                        noteBanner.classList.add('read');
+                        document.getElementById('note-title').innerText = "Morning Letter (Read)";
+                        document.getElementById('note-icon').className = "fa-solid fa-envelope-open-text";
+                    } else {
+                        noteBanner.classList.remove('read');
+                        document.getElementById('note-title').innerText = "Morning Letter waiting for you...";
+                        document.getElementById('note-icon').className = "fa-solid fa-envelope";
+                    }
                 } else {
-                    noteBanner.classList.remove('read');
-                    document.getElementById('note-title').innerText = "Morning Letter waiting for you...";
-                    document.getElementById('note-icon').className = "fa-solid fa-envelope";
+                    noteBanner.style.display = 'none';
                 }
             } else {
                 noteBanner.style.display = 'none';
             }
         });
 
-        // NEW: LEAVE A LETTER LOGIC
         function getUnlockTime() {
             let now = new Date();
             let hour = now.getHours();
             let unlock = new Date(now);
             if (hour >= 22) { unlock.setDate(unlock.getDate() + 1); unlock.setHours(6, 0, 0, 0); } 
             else if (hour < 6) { unlock.setHours(6, 0, 0, 0); } 
-            else { return now.getTime(); }
+            else { return now.getTime(); } // Should not happen due to block, but safe fallback
             return unlock.getTime();
         }
 
         window.submitLaraNote = function() {
             const txt = document.getElementById('lara-note-input').value.trim();
             if(txt === "") return;
+            
+            // Lara can ONLY write between 10 PM and 6 AM.
             let unlock = getUnlockTime();
-            set(ref(db, 'laraNote'), { text: txt, read: false, timestamp: serverTimestamp(), unlockTime: unlock });
+            
+            set(ref(db, 'laraNote'), { 
+                text: txt, 
+                read: false, 
+                timestamp: serverTimestamp(), 
+                unlockTime: unlock 
+            });
+            
             document.getElementById('lara-note-input').value = "";
             notifyMohamed('letter');
             window.closeWriteMenu();
-            if (unlock > Date.now()) { alert("Note sealed! Mohamed won't see it until 6:00 AM."); } 
-            else { alert("Note securely delivered to Mohamed's Overseer Terminal."); }
+            
+            if (unlock > Date.now()) { 
+                alert("Letter sealed! Mohamed will receive it at 6:00 AM."); 
+            } else { 
+                alert("Note securely delivered."); 
+            }
         };
 
         window.openWriteMenu = function() { 
             const hour = new Date().getHours();
+            // 10 PM to 6 AM
             if (hour >= 6 && hour < 22) {
                 alert("The letter drop only opens at night (10:00 PM to 6:00 AM).");
                 return;
@@ -641,6 +712,27 @@
             }, 400); 
         };
 
+        // --- PROMISE ANIMATION LOGIC ---
+        window.openEnvelope = function() {
+            const envelope = document.getElementById("the-envelope");
+            const openText = document.querySelector(".open-text");
+            const topText = document.querySelector(".top-text");
+            
+            envelope.classList.add("open");
+            openText.style.display = "none";
+            topText.style.opacity = "0";
+            
+            setTimeout(() => {
+                document.getElementById("envelope-scene").style.opacity = "0";
+                setTimeout(() => {
+                    document.getElementById("envelope-scene").style.display = "none";
+                    const scrapbook = document.getElementById("scrapbook-scene");
+                    scrapbook.style.display = "block"; 
+                    setTimeout(() => { scrapbook.style.opacity = "1"; }, 50);
+                }, 1000);
+            }, 2000); 
+        };
+
         window.openPromise = function() { 
             const dScreen = document.getElementById('dashboard-screen');
             const pScreen = document.getElementById('promise-screen');
@@ -660,6 +752,17 @@
                 pScreen.style.display = 'none'; 
                 dScreen.style.display = 'flex'; 
                 setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
+                
+                // Reset animation state so it can be opened again
+                setTimeout(() => {
+                    document.getElementById("the-envelope").classList.remove("open");
+                    document.querySelector(".open-text").style.display = "block";
+                    document.querySelector(".top-text").style.opacity = "1";
+                    document.getElementById("envelope-scene").style.display = "flex";
+                    document.getElementById("envelope-scene").style.opacity = "1";
+                    document.getElementById("scrapbook-scene").style.display = "none";
+                    document.getElementById("scrapbook-scene").style.opacity = "0";
+                }, 500);
             }, 400); 
         };
 
