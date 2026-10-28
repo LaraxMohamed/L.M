@@ -625,17 +625,22 @@
             } else {
                 morningNoteData = null;
                 noteBanner.style.display = 'none';
+                noteContent.innerText = "Loading...";
             }
         });
 
         function updateMorningBannerState() {
             if (!morningNoteData || !morningNoteData.text) {
                 noteBanner.style.display = 'none';
+                noteContent.innerText = "Loading...";
                 return;
             }
 
             noteBanner.style.display = 'flex';
             noteBanner.classList.remove('read');
+
+            // Set the content immediately so it's ready when she opens it
+            noteContent.innerText = morningNoteData.text;
 
             if (morningNoteData.read) {
                 noteBanner.classList.add('read');
