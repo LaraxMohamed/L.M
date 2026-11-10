@@ -724,8 +724,6 @@
             }
             
             // Convert the Egypt target time back to UTC milliseconds for the timestamp
-            // The egyptUnlock object is currently a "fake" local time that represents Egypt time.
-            // We need to subtract the 2 hours to get the actual UTC timestamp.
             const unlockUtcMs = egyptUnlock.getTime() - (2 * 60 * 60 * 1000);
             return unlockUtcMs;
         }
@@ -1095,22 +1093,8 @@
             recalcStreak();
         });
 
-        // --- NEW: MASTER RESET LISTENER ---
-        onValue(ref(db, 'settings/forceClear'), (snapshot) => {
-            if (snapshot.exists()) {
-                const clearTime = snapshot.val();
-                const lastClear = localStorage.getItem('lastForceClear') || 0;
-                
-                // If this is a new signal we haven't processed yet
-                if (clearTime > lastClear) {
-                    localStorage.removeItem('lastKnownStreak');
-                    localStorage.setItem('lastForceClear', clearTime);
-                    recalcStreak(); // Force immediate recalculation
-                }
-            }
-        });
-
         function recalcStreak() {
+            // Pure math calculation, NO LOCALSTORAGE.
             const validMsgs = currentMessages.filter(m => m.timestamp && m.timestamp >= streakAnchor);
             let mathStreak = 0;
             if (validMsgs.length > 0) {
@@ -1138,18 +1122,8 @@
                 }
             }
             
-            // --- LOCAL BACKUP RESTORE ---
+            // Simply add the admin offset if it exists
             let finalStreak = mathStreak + streakOffset;
-            const lastKnown = localStorage.getItem('lastKnownStreak');
-            
-            if (finalStreak === 0 && lastKnown && parseInt(lastKnown) > 0) {
-                // If the calculated streak is 0 but we have a backup, restore it
-                finalStreak = parseInt(lastKnown);
-            } else if (finalStreak > 0) {
-                // Save the new high score to the local backup
-                localStorage.setItem('lastKnownStreak', finalStreak.toString());
-            }
-
             document.getElementById('streak-count').innerText = finalStreak.toString();
         }
 
