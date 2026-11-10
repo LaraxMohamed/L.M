@@ -124,10 +124,46 @@
         .polaroid:nth-child(odd) { transform: rotate(-2deg) translateY(-5px); }
         .polaroid:active { transform: scale(0.95); }
 
-        #note-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; }
+        #note-screen { padding-bottom: 0; overflow-y: auto; justify-content: flex-start; position: relative; }
         .cinematic-letter { width: 100%; background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 28px; padding: 35px 25px; backdrop-filter: blur(30px); margin-bottom: 35px; flex-shrink: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
         .cinematic-letter::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff9a9e, #fecfef); }
         .daily-text { font-family: 'Caveat', cursive; font-size: 1.8rem; line-height: 1.5; color: #fff; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; letter-spacing: 1px; }
+
+        /* Animated Scratch-off canvas overlay */
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            z-index: 50;
+            cursor: crosshair;
+            touch-action: none;
+            transition: opacity 0.8s ease;
+        }
+        #scratch-canvas.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .scratch-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.6);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            z-index: 55;
+            pointer-events: none;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            animation: hintPulse 2s infinite ease-in-out;
+        }
+        @keyframes hintPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
         .write-area { width: 100%; min-height: 250px; background: transparent; border: none; color: #fff; font-family: 'Caveat', cursive; font-size: 1.8rem; outline: none; resize: none; }
         .write-area::placeholder { color: rgba(255,255,255,0.3); }
@@ -361,8 +397,10 @@
                 <i class="fa-solid fa-chevron-down back-btn" onclick="closeNote()"></i>
                 <div class="term-header">Morning Letter</div>
             </div>
-            <div class="cinematic-letter">
+            <div class="cinematic-letter" id="letter-container">
                 <div class="daily-text" id="daily-note-content">Loading...</div>
+                <canvas id="scratch-canvas"></canvas>
+                <div class="scratch-hint" id="scratch-hint">Scratch to reveal</div>
             </div>
         </div>
 
@@ -655,17 +693,51 @@
         // Check every minute if the letter has unlocked while the app is open
         setInterval(updateMorningBannerState, 60000);
 
+        // --- EGYPT TIMEZONE HELPER (UTC+2) ---
+        function getEgyptTime() {
+            const now = new Date();
+            // Egypt is UTC+2 (Winter Time as of late 2023 onwards)
+            // Get UTC time in ms, add 2 hours
+            const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const egyptMs = utcMs + (2 * 60 * 60 * 1000); 
+            return new Date(egyptMs);
+        }
+
         function getUnlockTime() {
-            let now = new Date();
-            let hour = now.getHours();
-            let unlock = new Date(now);
-            if (hour >= 22) { unlock.setDate(unlock.getDate() + 1); unlock.setHours(6, 0, 0, 0); } 
-            else if (hour < 6) { unlock.setHours(6, 0, 0, 0); } 
-            else { return now.getTime(); } 
-            return unlock.getTime();
+            const egyptNow = getEgyptTime();
+            const egyptHour = egyptNow.getHours();
+            
+            let egyptUnlock = new Date(egyptNow);
+            
+            // If it's 10 PM or later -> unlock tomorrow at 6 AM
+            if (egyptHour >= 22) {
+                egyptUnlock.setDate(egyptUnlock.getDate() + 1);
+                egyptUnlock.setHours(6, 0, 0, 0);
+            } 
+            // If it's before 6 AM -> unlock today at 6 AM
+            else if (egyptHour < 6) {
+                egyptUnlock.setHours(6, 0, 0, 0);
+            } 
+            // During the day (shouldn't happen due to block, but safe fallback)
+            else {
+                return Date.now();
+            }
+            
+            // Convert the Egypt target time back to UTC milliseconds for the timestamp
+            // The egyptUnlock object is currently a "fake" local time that represents Egypt time.
+            // We need to subtract the 2 hours to get the actual UTC timestamp.
+            const unlockUtcMs = egyptUnlock.getTime() - (2 * 60 * 60 * 1000);
+            return unlockUtcMs;
         }
 
         window.submitLaraNote = function() {
+            const egyptHour = getEgyptTime().getHours();
+            // Strict check: Only allow writing between 10 PM and 6 AM Egypt Time
+            if (egyptHour >= 6 && egyptHour < 22) {
+                alert("The letter drop only opens at night (10:00 PM to 6:00 AM Egypt Time).");
+                return;
+            }
+
             const txt = document.getElementById('lara-note-input').value.trim();
             if(txt === "") return;
             
@@ -683,16 +755,16 @@
             window.closeWriteMenu();
             
             if (unlock > Date.now()) { 
-                alert("Letter sealed! Mohamed will receive it at 6:00 AM."); 
+                alert("Letter sealed! Mohamed will receive it at 6:00 AM Egypt Time."); 
             } else { 
                 alert("Note securely delivered."); 
             }
         };
 
         window.openWriteMenu = function() { 
-            const hour = new Date().getHours();
-            if (hour >= 6 && hour < 22) {
-                alert("The letter drop only opens at night (10:00 PM to 6:00 AM).");
+            const egyptHour = getEgyptTime().getHours();
+            if (egyptHour >= 6 && egyptHour < 22) {
+                alert("The letter drop only opens at night (10:00 PM to 6:00 AM Egypt Time).");
                 return;
             }
             const dScreen = document.getElementById('dashboard-screen');
@@ -711,6 +783,252 @@
             wScreen.classList.add('slide-hidden'); 
             setTimeout(() => { 
                 wScreen.style.display = 'none'; 
+                dScreen.style.display = 'flex'; 
+                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
+            }, 400); 
+        };
+
+        // --- ANIMATED SCRATCH CARD LOGIC ---
+        let scratchCanvas, scratchCtx;
+        let isScratching = false;
+        let hasScratchedEnough = false;
+        let animationFrameId = null;
+        let scratchParticles = []; // For the floating emojis
+
+        function initScratchCard() {
+            scratchCanvas = document.getElementById('scratch-canvas');
+            const container = document.getElementById('letter-container');
+            if (!scratchCanvas || !container) return;
+
+            // Set canvas size to match container
+            const rect = container.getBoundingClientRect();
+            scratchCanvas.width = rect.width;
+            scratchCanvas.height = rect.height;
+
+            scratchCtx = scratchCanvas.getContext('2d', { willReadFrequently: true });
+
+            // Reset state
+            isScratching = false;
+            hasScratchedEnough = false;
+            scratchCanvas.classList.remove('fade-out');
+            document.getElementById('scratch-hint').style.display = 'block';
+
+            // --- INITIALIZE FLOATING PARTICLES ---
+            scratchParticles = [];
+            const emojis = ['🫂', '❤️', '✨', '💕'];
+            const numParticles = Math.floor((scratchCanvas.width * scratchCanvas.height) / 15000); // Density based on area
+
+            for (let i = 0; i < numParticles; i++) {
+                scratchParticles.push({
+                    x: Math.random() * scratchCanvas.width,
+                    y: Math.random() * scratchCanvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 20 + 15, // Font size 15px to 35px
+                    opacity: Math.random() * 0.6 + 0.3,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.02,
+                    emoji: emojis[Math.floor(Math.random() * emojis.length)]
+                });
+            }
+
+            // Add the central 16.09 text as a special particle
+            scratchParticles.push({
+                x: scratchCanvas.width / 2,
+                y: scratchCanvas.height / 2,
+                vx: 0, vy: 0,
+                size: 80, // Large Caveat font
+                opacity: 0.9,
+                rotation: 0,
+                rotSpeed: 0,
+                emoji: '16.09',
+                isMainText: true
+            });
+
+            // Start the animation loop
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animateScratchMask();
+
+            // Attach event listeners (remove old ones to prevent duplicates)
+            scratchCanvas.removeEventListener('mousedown', startScratch);
+            scratchCanvas.removeEventListener('touchstart', startScratch);
+            scratchCanvas.removeEventListener('mousemove', scratch);
+            scratchCanvas.removeEventListener('touchmove', scratch);
+            scratchCanvas.removeEventListener('mouseup', endScratch);
+            scratchCanvas.removeEventListener('touchend', endScratch);
+
+            scratchCanvas.addEventListener('mousedown', startScratch);
+            scratchCanvas.addEventListener('touchstart', startScratch, { passive: false });
+            scratchCanvas.addEventListener('mousemove', scratch);
+            scratchCanvas.addEventListener('touchmove', scratch, { passive: false });
+            scratchCanvas.addEventListener('mouseup', endScratch);
+            scratchCanvas.addEventListener('touchend', endScratch);
+            scratchCanvas.addEventListener('mouseleave', endScratch);
+        }
+
+        function animateScratchMask() {
+            if (!scratchCtx || hasScratchedEnough) return;
+
+            // 1. Fill background with a deep gradient
+            const grad = scratchCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
+            grad.addColorStop(0, '#2a1a2f'); // Dark purple
+            grad.addColorStop(0.5, '#1a0a15'); // Darker middle
+            grad.addColorStop(1, '#3a1a25'); // Slightly reddish
+            scratchCtx.fillStyle = grad;
+            scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+
+            // 2. Draw floating particles
+            scratchParticles.forEach(p => {
+                // Update position
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rotation += p.rotSpeed;
+
+                // Wrap around edges smoothly
+                if (p.x < -50) p.x = scratchCanvas.width + 50;
+                if (p.x > scratchCanvas.width + 50) p.x = -50;
+                if (p.y < -50) p.y = scratchCanvas.height + 50;
+                if (p.y > scratchCanvas.height + 50) p.y = -50;
+
+                // Draw
+                scratchCtx.save();
+                scratchCtx.translate(p.x, p.y);
+                scratchCtx.rotate(p.rotation);
+                scratchCtx.globalAlpha = p.opacity;
+
+                if (p.isMainText) {
+                    // Draw the elegant 16.09 text
+                    scratchCtx.font = `${p.size}px "Caveat", cursive`;
+                    scratchCtx.fillStyle = '#ff9a9e';
+                    scratchCtx.textAlign = 'center';
+                    scratchCtx.textBaseline = 'middle';
+                    // Add a soft glow
+                    scratchCtx.shadowColor = 'rgba(255, 154, 158, 0.6)';
+                    scratchCtx.shadowBlur = 20;
+                    scratchCtx.fillText(p.emoji, 0, 0);
+                    scratchCtx.shadowBlur = 0; // Reset shadow
+                } else {
+                    // Draw emojis
+                    scratchCtx.font = `${p.size}px "Inter", sans-serif`;
+                    scratchCtx.textAlign = 'center';
+                    scratchCtx.textBaseline = 'middle';
+                    scratchCtx.fillText(p.emoji, 0, 0);
+                }
+                scratchCtx.restore();
+            });
+
+            // 3. Request next frame
+            animationFrameId = requestAnimationFrame(animateScratchMask);
+        }
+
+        function getEventPos(e) {
+            const rect = scratchCanvas.getBoundingClientRect();
+            let x, y;
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            return { x, y };
+        }
+
+        function startScratch(e) {
+            if (hasScratchedEnough) return;
+            e.preventDefault();
+            isScratching = true;
+            document.getElementById('scratch-hint').style.display = 'none';
+            const pos = getEventPos(e);
+            scratchCtx.beginPath();
+            scratchCtx.moveTo(pos.x, pos.y);
+        }
+
+        function scratch(e) {
+            if (!isScratching || hasScratchedEnough) return;
+            e.preventDefault();
+            const pos = getEventPos(e);
+            
+            scratchCtx.globalCompositeOperation = 'destination-out';
+            scratchCtx.lineWidth = 50; // Wider brush for easier scratching
+            scratchCtx.lineCap = 'round';
+            scratchCtx.lineJoin = 'round';
+            
+            scratchCtx.lineTo(pos.x, pos.y);
+            scratchCtx.stroke();
+            scratchCtx.beginPath();
+            scratchCtx.moveTo(pos.x, pos.y);
+
+            // Check percentage
+            checkScratchPercentage();
+        }
+
+        function endScratch(e) {
+            if (e && e.cancelable) e.preventDefault();
+            isScratching = false;
+        }
+
+        function checkScratchPercentage() {
+            if (hasScratchedEnough) return;
+
+            const imageData = scratchCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
+            const pixels = imageData.data;
+            let transparentPixels = 0;
+            const totalPixels = pixels.length / 4;
+
+            // Sample every 4th pixel for performance
+            for (let i = 3; i < pixels.length; i += 16) {
+                if (pixels[i] === 0) {
+                    transparentPixels++;
+                }
+            }
+
+            const sampleTotal = totalPixels / 4;
+            const percentage = (transparentPixels / sampleTotal) * 100;
+
+            // Trigger fade at 75%
+            if (percentage >= 75) {
+                hasScratchedEnough = true;
+                scratchCanvas.classList.add('fade-out');
+                document.getElementById('scratch-hint').style.display = 'none';
+                
+                // Stop animation to save CPU
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                
+                // Mark as read in DB
+                if (morningNoteData) {
+                    update(ref(db, 'morningNote'), { read: true });
+                }
+            }
+        }
+
+        window.openNote = function() {
+            if (morningNoteData && morningNoteData.unlockTime && Date.now() < morningNoteData.unlockTime) {
+                alert("This letter is encrypted and will unlock at 6:00 AM.");
+                return;
+            }
+
+            const dScreen = document.getElementById('dashboard-screen');
+            const nScreen = document.getElementById('note-screen');
+            dScreen.classList.add('slide-hidden'); 
+            
+            setTimeout(() => { 
+                dScreen.style.display = 'none'; 
+                nScreen.style.display = 'flex'; 
+                setTimeout(() => { 
+                    nScreen.classList.remove('slide-hidden'); 
+                    // Initialize the scratch card once the screen is visible
+                    setTimeout(initScratchCard, 100);
+                }, 50); 
+            }, 400); 
+        };
+
+        window.closeNote = function() {
+            const dScreen = document.getElementById('dashboard-screen');
+            const nScreen = document.getElementById('note-screen');
+            nScreen.classList.add('slide-hidden'); 
+            setTimeout(() => { 
+                nScreen.style.display = 'none'; 
                 dScreen.style.display = 'flex'; 
                 setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
             }, 400); 
@@ -769,36 +1087,6 @@
             }, 400); 
         };
 
-        window.openNote = function() {
-            if (morningNoteData && morningNoteData.unlockTime && Date.now() < morningNoteData.unlockTime) {
-                alert("This letter is encrypted and will unlock at 6:00 AM.");
-                return;
-            }
-
-            const dScreen = document.getElementById('dashboard-screen');
-            const nScreen = document.getElementById('note-screen');
-            dScreen.classList.add('slide-hidden'); 
-            
-            update(ref(db, 'morningNote'), { read: true });
-            
-            setTimeout(() => { 
-                dScreen.style.display = 'none'; 
-                nScreen.style.display = 'flex'; 
-                setTimeout(() => { nScreen.classList.remove('slide-hidden'); }, 50); 
-            }, 400); 
-        };
-
-        window.closeNote = function() {
-            const dScreen = document.getElementById('dashboard-screen');
-            const nScreen = document.getElementById('note-screen');
-            nScreen.classList.add('slide-hidden'); 
-            setTimeout(() => { 
-                nScreen.style.display = 'none'; 
-                dScreen.style.display = 'flex'; 
-                setTimeout(() => dScreen.classList.remove('slide-hidden'), 50); 
-            }, 400); 
-        };
-
         onValue(ref(db, 'settings/streakState'), (snapshot) => {
             if(snapshot.exists()) {
                 streakAnchor = snapshot.val().anchor || 0;
@@ -834,7 +1122,20 @@
                     }
                 }
             }
-            document.getElementById('streak-count').innerText = (mathStreak + streakOffset).toString();
+            
+            // --- LOCAL BACKUP RESTORE ---
+            let finalStreak = mathStreak + streakOffset;
+            const lastKnown = localStorage.getItem('lastKnownStreak');
+            
+            if (finalStreak === 0 && lastKnown && parseInt(lastKnown) > 0) {
+                // If the calculated streak is 0 but we have a backup, restore it
+                finalStreak = parseInt(lastKnown);
+            } else if (finalStreak > 0) {
+                // Save the new high score to the local backup
+                localStorage.setItem('lastKnownStreak', finalStreak.toString());
+            }
+
+            document.getElementById('streak-count').innerText = finalStreak.toString();
         }
 
         onValue(ref(db, 'settings/remoteLock'), (snapshot) => {
