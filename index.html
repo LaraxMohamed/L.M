@@ -470,7 +470,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, serverTimestamp, update, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp, update, set, remove } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrjUFPcoAUuvUGTofcZOjOaT8__dLjdJU",
@@ -1093,6 +1093,21 @@
                 streakOffset = snapshot.val().offset || 0;
             } else { streakAnchor = 0; streakOffset = 0; }
             recalcStreak();
+        });
+
+        // --- NEW: MASTER RESET LISTENER ---
+        onValue(ref(db, 'settings/forceClear'), (snapshot) => {
+            if (snapshot.exists()) {
+                const clearTime = snapshot.val();
+                const lastClear = localStorage.getItem('lastForceClear') || 0;
+                
+                // If this is a new signal we haven't processed yet
+                if (clearTime > lastClear) {
+                    localStorage.removeItem('lastKnownStreak');
+                    localStorage.setItem('lastForceClear', clearTime);
+                    recalcStreak(); // Force immediate recalculation
+                }
+            }
         });
 
         function recalcStreak() {
